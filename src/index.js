@@ -4,9 +4,11 @@ import { Ship } from "./js/ship";
 
 const board = new Gameboard();
 board.createGameBoard();
-board.place(0, 0, 3);
-board.board[0][0].hit();
-board.board[0][0].hit();
-board.board[0][0].hit();
-console.log(board.board);
-console.log(board.areAllShipsSunk());
+for (let i = 0; i < 5; i++) {
+  const x = prompt("Enter x coordinates: ");
+  const y = prompt("Enter y coordinates: ");
+  const longitud = prompt("Enter the length of the ship: ");
+  const orientation = prompt("Enter the orientation (horizontal/vertical)");
+  board.place(x, y, longitud, orientation);
+  console.log(board.board);
+}
