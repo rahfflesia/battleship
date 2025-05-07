@@ -5,7 +5,10 @@ class Ship {
   }
 
   hit() {
-    this.hits++;
+    if (this.hits < this.length) {
+      this.hits++;
+    }
+    return null;
   }
 
   isSunk() {
@@ -13,4 +16,4 @@ class Ship {
   }
 }
 
-export { Ship };
+module.exports = Ship;
