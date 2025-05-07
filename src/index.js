@@ -1,3 +1,4 @@
+import "./styles.css";
 import { Gameboard } from "./js/gameboard";
-import { Player } from "./js/player";
 import { Ship } from "./js/ship";
+import { Player } from "./js/player";

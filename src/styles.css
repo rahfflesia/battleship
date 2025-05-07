@@ -1,0 +1,80 @@
+@import url("https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+  --font-color: #fff;
+  --background-color: black;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Roboto", sans-serif;
+}
+
+body {
+  padding: 1rem;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.game-title {
+  text-align: center;
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+}
+
+.player-1-options,
+.player-2-options {
+  font-weight: bold;
+  font-size: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid lightgray;
+  border-radius: 0.25rem;
+  padding: 2rem;
+}
+
+.main-content-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.play-button {
+  margin-top: 0.75rem;
+  padding: 1rem 3rem;
+  background-color: var(--background-color);
+  color: var(--font-color);
+  border: none;
+  font-weight: bold;
+  font-size: 1.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.play-button:hover {
+  transform: scale(1.01);
+}
+
+input {
+  border: 1px solid lightgray;
+  outline: none;
+  padding: 0.25rem 1rem;
+  border-radius: 0.25rem;
+}
+
+select {
+  background-color: var(--font-color);
+  border: 1px solid lightgray;
+  font-weight: bold;
+  border-radius: 0.25rem;
+  padding: 0.25rem 1rem;
+}
+
+.main-menu {
+  display: flex;
+}
