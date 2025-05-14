@@ -77,4 +77,35 @@ select {
 
 .main-menu {
   display: flex;
+  flex-direction: column;
+}
+
+.dialog:open {
+  max-width: 500px;
+  border: none;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  top: 10%;
+}
+
+.dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+}
+
+.close-modal {
+  font-weight: bold;
+  font-size: 1.2rem;
+  border: 3px solid lightgray;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
 }

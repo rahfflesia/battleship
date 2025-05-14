@@ -1,6 +1,6 @@
-import Ship from "./ship";
+import { Ship } from "./ship";
 
-const maximumIndex = 10;
+const maximumIndex = 9;
 const maximumLength = 5;
 
 class Gameboard {
@@ -9,7 +9,7 @@ class Gameboard {
 
   createGameboard() {
     for (let i = 0; i < 10; i++) {
-      this.board[i] = new Array(maximumIndex);
+      this.board[i] = new Array(maximumIndex + 1);
     }
   }
 

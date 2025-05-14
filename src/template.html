@@ -6,6 +6,18 @@
     <title>Battleship</title>
   </head>
   <body>
+    <dialog class="dialog">
+      <div class="top">
+        <h2 class="modal-title">Dummy title</h2>
+        <div class="close-modal">X</div>
+      </div>
+      <p class="modal-message">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus molestias
+        veritatis dicta voluptate dolores libero deleniti unde sequi ipsum
+        perspiciatis iusto molestiae, maiores ducimus inventore ab tempore eum
+        eaque omnis?
+      </p>
+    </dialog>
     <h1 class="game-title">Battleship</h1>
     <div class="main-menu">
       <div class="main-content-container">
@@ -15,13 +27,15 @@
         </div>
         <div class="player-2-options">
           <span class="span">Select the type of player</span>
-          <select name="" id="">
+          <select name="" id="" class="options">
             <option value="Player">Player</option>
             <option value="Computer">Computer</option>
           </select>
         </div>
       </div>
-      <button class="play-button">Play</button>
+      <div class="btn-container">
+        <button class="play-button">Play</button>
+      </div>
     </div>
   </body>
 </html>
