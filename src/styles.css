@@ -44,7 +44,8 @@ body {
   gap: 1rem;
 }
 
-.play-button {
+.play-button,
+.next-button {
   margin-top: 0.75rem;
   padding: 1rem 3rem;
   background-color: var(--background-color);
