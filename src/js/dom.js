@@ -92,13 +92,23 @@ class Dom {
     const widthHeight = "400px";
     this.#removeAllChilds(this.#mainMenu);
 
+    const body = document.querySelector("body");
+
     const mainSection = document.querySelector(".main-menu");
     mainSection.style.flexDirection = "row";
     mainSection.style.gap = "1rem";
 
+    const playerOneGameboardContainer = document.createElement("div");
     const playerOneGameboard = document.createElement("div");
+    playerOneGameboard.classList.add("gameboard");
+
     const shipsContainer = document.createElement("div");
+
+    const playerTwoGameboardContainer = document.createElement("div");
     const playerTwoGameboard = document.createElement("div");
+    playerTwoGameboard.classList.add("gameboard");
+
+    const playButtonGameboardsSection = document.createElement("button");
 
     playerOneGameboard.style.width = widthHeight;
     playerOneGameboard.style.height = widthHeight;
@@ -112,18 +122,38 @@ class Dom {
     playerTwoGameboard.style.width = widthHeight;
     playerTwoGameboard.style.height = widthHeight;
 
-    const nodes = [playerOneGameboard, shipsContainer, playerTwoGameboard];
+    const nodes = [
+      playerOneGameboardContainer,
+      shipsContainer,
+      playerTwoGameboardContainer,
+    ];
+
     for (let i = 0; i < nodes.length; i++) {
       mainSection.appendChild(nodes[i]);
     }
+
+    const playerOneGameboardTitle = document.createElement("span");
+    playerOneGameboardTitle.textContent = "Player1's gameboard";
+    playerOneGameboardTitle.style.fontWeight = "bold";
+    playerOneGameboardTitle.style.fontSize = "1.5rem";
+
+    const playerTwoGameboardTitle = document.createElement("span");
+    playerTwoGameboardTitle.textContent = "Player2's gameboard";
+    playerTwoGameboardTitle.style.fontWeight = "bold";
+    playerTwoGameboardTitle.style.fontSize = "1.5rem";
+
+    playerOneGameboardContainer.appendChild(playerOneGameboardTitle);
+    playerTwoGameboardContainer.appendChild(playerTwoGameboardTitle);
 
     const widthHeightCell = "40px";
 
     for (let i = 0; i < max; i++) {
       const playerOneGameboardRow = document.createElement("div");
+      playerOneGameboardRow.classList.add("row");
       playerOneGameboardRow.style.display = "flex";
       for (let j = 0; j < max; j++) {
         const playerOneGameboardCell = document.createElement("div");
+        playerOneGameboardCell.classList.add("player1-cell");
         playerOneGameboardCell.style.width = widthHeightCell;
         playerOneGameboardCell.style.height = widthHeightCell;
         playerOneGameboardCell.style.border = "1px solid lightgray";
@@ -132,27 +162,34 @@ class Dom {
       playerOneGameboard.appendChild(playerOneGameboardRow);
     }
 
+    playerOneGameboardContainer.appendChild(playerOneGameboard);
+
     const message = document.createElement("div");
     message.textContent =
       "Drag and drop the ships to their respective locations";
     shipsContainer.appendChild(message);
 
     const ships = [
-      { name: "Carrier", size: 5 },
-      { name: "Battleship", size: 4 },
-      { name: "Cruiser", size: 3 },
-      { name: "Submarine", size: 3 },
-      { name: "Destroyer", size: 2 },
+      { name: "carrier", size: 5 },
+      { name: "battleship", size: 4 },
+      { name: "cruiser", size: 3 },
+      { name: "submarine", size: 3 },
+      { name: "destroyer", size: 2 },
     ];
 
     for (let i = 0; i < ships.length; i++) {
       const shipDiv = document.createElement("div");
+      shipDiv.classList.add("ship");
+      shipDiv.id = ships[i].name;
+      shipDiv.draggable = "true";
       shipDiv.style.display = "flex";
       for (let j = 0; j < ships[i].size; j++) {
         const shipCell = document.createElement("div");
+        shipCell.classList.add("ship-cell");
         shipCell.style.width = widthHeightCell;
         shipCell.style.height = widthHeightCell;
         shipCell.style.border = "1px solid lightgray";
+        shipCell.style.backgroundColor = "gray";
         shipDiv.appendChild(shipCell);
       }
       shipsContainer.appendChild(shipDiv);
@@ -160,6 +197,7 @@ class Dom {
 
     for (let i = 0; i < max; i++) {
       const playerTwoGameboardRow = document.createElement("div");
+      playerTwoGameboardRow.classList.add("row");
       playerTwoGameboardRow.style.display = "flex";
       for (let j = 0; j < max; j++) {
         const playerTwoGameboardCell = document.createElement("div");
@@ -170,6 +208,12 @@ class Dom {
       }
       playerTwoGameboard.appendChild(playerTwoGameboardRow);
     }
+
+    playerTwoGameboardContainer.appendChild(playerTwoGameboard);
+
+    playButtonGameboardsSection.textContent = "Play";
+    playButtonGameboardsSection.classList.add("play-button-gameboards");
+    body.appendChild(playButtonGameboardsSection);
   }
 }
 

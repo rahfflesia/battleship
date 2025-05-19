@@ -45,7 +45,8 @@ body {
 }
 
 .play-button,
-.next-button {
+.next-button,
+.play-button-gameboards {
   margin-top: 0.75rem;
   padding: 1rem 3rem;
   background-color: var(--background-color);
@@ -57,7 +58,9 @@ body {
   cursor: pointer;
 }
 
-.play-button:hover {
+.play-button:hover,
+.next-button:hover,
+.play-button-gameboards:hover {
   transform: scale(1.01);
 }
 

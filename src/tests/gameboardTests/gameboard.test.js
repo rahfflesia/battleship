@@ -1,5 +1,5 @@
-const Gameboard = require("../../js/gameboard.js");
-import Ship from "../../js/ship.js";
+import { Ship } from "../../js/ship.js";
+import { Gameboard } from "../../js/gameboard.js";
 
 // Gameboard public interface tests
 describe("First gameboard test", () => {
