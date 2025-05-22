@@ -1,7 +1,9 @@
 import { Ship } from "./ship";
+import { Dom } from "./dom";
 
 const maximumIndex = 9;
 const maximumLength = 5;
+const dom = new Dom();
 
 class Gameboard {
   board = [];
@@ -15,7 +17,7 @@ class Gameboard {
 
   receiveAttack(x, y) {
     if (x > maximumIndex || x < 0 || y > maximumIndex || y < 0) {
-      throw new Error("Index out of bounds");
+      dom.showModal("Index out of bounds");
     } else {
       const target = this.board[x][y];
       if (target instanceof Ship) {
@@ -28,37 +30,83 @@ class Gameboard {
     }
   }
 
+  isPositionValid(x, y, length, orientation) {
+    if (orientation) {
+      for (let i = y; i < y + length; i++) {
+        if (
+          this.board[x][i] instanceof Ship ||
+          this.board[x][i] !== undefined
+        ) {
+          return false;
+        }
+      }
+    } else if (orientation === "vertical") {
+      for (let i = x; i < x + length; i++) {
+        if (
+          this.board[i][y] instanceof Ship ||
+          this.board[i][y] !== undefined
+        ) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  isShipInBounds(x, y, length, orientation) {
+    if (orientation) {
+      for (let i = x; i < x + length; i++) {
+        if (y + length > maximumIndex + 1) {
+          return false;
+        }
+      }
+    } else if (orientation === "vertical") {
+      for (let i = y; i < y + length; i++) {
+        if (x + length > maximumIndex + 1) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   place(x, y, length, orientation = "horizontal") {
     if (length > maximumLength) {
-      throw new Error("Ship exceeds the maximum length");
+      dom.showModal("Error", "Ship exceeds the maximum length");
     } else if (x > maximumIndex || x < 0 || y > maximumIndex || y < 0) {
-      throw new Error("Index out of bounds");
+      dom.showModal("Error", "Trying to place ship out of bounds");
     } else {
       const newShip = new Ship(length);
       if (orientation) {
-        for (let i = 0; i < length; i++) {
-          if (
-            !(this.board[x][i] instanceof Ship) &&
-            this.board[x][i] === undefined
-          ) {
+        if (
+          this.isPositionValid(x, y, length, orientation) &&
+          this.isShipInBounds(x, y, length, orientation)
+        ) {
+          for (let i = y; i < y + length; i++) {
             this.board[x][i] = newShip;
-          } else {
-            throw new Error("That slot is not empty");
           }
+        } else {
+          dom.showModal(
+            "Error",
+            "All the slots required to place the ship are not empty or the ship is out of bounds"
+          );
         }
       } else if (orientation === "vertical") {
-        for (let i = 0; i < length; i++) {
-          if (
-            !(this.board[i][y] instanceof Ship) &&
-            this.board[i][y] === undefined
-          ) {
+        if (
+          this.isPositionValid(x, y, length, orientation) &&
+          this.isShipInBounds(x, y, length, orientation)
+        ) {
+          for (let i = x; i < x + length; i++) {
             this.board[i][y] = newShip;
-          } else {
-            throw new Error("That slot is not empty");
           }
+        } else {
+          dom.showModal(
+            "Error",
+            "All the slots required to place the ship are not empty or the ship is out of bounds"
+          );
         }
       } else {
-        throw new Error("Not a valid orientation");
+        dom.showModal("Error", "Not a valid orientation");
       }
     }
   }

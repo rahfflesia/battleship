@@ -1,3 +1,7 @@
+import { Ship } from "./ship";
+
+const maxIndex = 9;
+
 class Dom {
   #modal = document.querySelector(".dialog");
   #mainMenu = document.querySelector(".main-menu");
@@ -201,6 +205,7 @@ class Dom {
       playerTwoGameboardRow.style.display = "flex";
       for (let j = 0; j < max; j++) {
         const playerTwoGameboardCell = document.createElement("div");
+        playerTwoGameboardCell.classList.add("player2-cell");
         playerTwoGameboardCell.style.width = widthHeightCell;
         playerTwoGameboardCell.style.height = widthHeightCell;
         playerTwoGameboardCell.style.border = "1px solid lightgray";
@@ -214,6 +219,61 @@ class Dom {
     playButtonGameboardsSection.textContent = "Play";
     playButtonGameboardsSection.classList.add("play-button-gameboards");
     body.appendChild(playButtonGameboardsSection);
+  }
+
+  isShipContainerInBounds(x, y, length, orientation) {
+    if (orientation) {
+      for (let i = y; i < y + length; i++) {
+        if (y + length > maxIndex + 1) {
+          return false;
+        }
+      }
+    } else if (orientation === "vertical") {
+      for (let i = x; i < x + length; i++) {
+        if (x + length > maxIndex + 1) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  showShipInGameboard(
+    x,
+    y,
+    length,
+    nodeListMatrix,
+    playerBoard,
+    orientation = "horizontal"
+  ) {
+    const shipBackgroundColor = "gray";
+    if (x > maxIndex || y > maxIndex || x < 0 || y < 0) {
+      return;
+    } else {
+      if (orientation) {
+        if (this.isShipContainerInBounds(x, y, length, orientation)) {
+          for (let i = y; i < y + length; i++) {
+            if (playerBoard[x][i] instanceof Ship) {
+              nodeListMatrix[x][i].style.backgroundColor = shipBackgroundColor;
+            }
+          }
+        } else {
+          return;
+        }
+      } else if (orientation === "vertical") {
+        if (this.isShipContainerInBounds(x, y, length, orientation)) {
+          for (let i = x; i < x + length; i++) {
+            if (playerBoard[i][y] instanceof Ship) {
+              nodeListMatrix[i][y].style.backgroundColor = shipBackgroundColor;
+            }
+          }
+        } else {
+          return;
+        }
+      } else {
+        return;
+      }
+    }
   }
 }
 

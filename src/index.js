@@ -1,6 +1,7 @@
 import "./styles.css";
 import { Dom } from "./js/dom";
 import { NodeList } from "./js/nodelist";
+import { Player } from "./js/player";
 
 const dom = new Dom();
 document.querySelector(".play-button").addEventListener("click", function () {
@@ -39,28 +40,46 @@ document.addEventListener("dragover", (event) => {
   }
 });
 
+const playerOne = new Player("player1");
+playerOne.playerBoard.createGameboard();
+
 document.addEventListener("drop", (event) => {
   if (cellsOne) {
-    event.preventDefault();
-    const shipData = event.dataTransfer.getData("text");
-    const shipToPlace = document.getElementById(shipData);
+    if (event.target.className !== "player1-cell") {
+      dom.showModal("Error", "Cannot place ship out of board bounds");
+    } else {
+      event.preventDefault();
+      const shipData = event.dataTransfer.getData("text");
+      const shipToPlace = document.getElementById(shipData);
 
-    const cellsPlayerOne = document.querySelectorAll(".player1-cell");
-    const nodeListMatrixPlayerOne = NodeList.nodeListToMatrix(cellsPlayerOne);
-    const targetCell = event.target;
+      const cellsPlayerOne = document.querySelectorAll(".player1-cell");
+      const nodeListMatrixPlayerOne = NodeList.nodeListToMatrix(cellsPlayerOne);
+      const targetCell = event.target;
 
-    console.log(nodeListMatrixPlayerOne);
-    console.log(NodeList.getIndexOf(targetCell, nodeListMatrixPlayerOne));
+      const coordinates = NodeList.getIndexOf(
+        targetCell,
+        nodeListMatrixPlayerOne
+      );
+
+      const x = coordinates["x"];
+      const y = coordinates["y"];
+      const shipLength = shipToPlace.childElementCount;
+
+      console.log(x, y);
+
+      playerOne.playerBoard.place(x, y, shipLength);
+      dom.showShipInGameboard(
+        x,
+        y,
+        shipLength,
+        nodeListMatrixPlayerOne,
+        playerOne.playerBoard.board
+      );
+
+      console.log(playerOne.playerBoard.board);
+    }
   }
 });
 
 // Player 2 gameboard
 // To-do
-
-// Funciona, nomás que aún no sé donde ponerlo
-/*
-const playerOneGameboardCells = document.querySelectorAll(".player1-cell");
-const nodeListMatrixPlayerOne = NodeList.nodeListToMatrix(
-  playerOneGameboardCells
-);
-console.log(nodeListMatrixPlayerOne);*/
