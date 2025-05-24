@@ -57,6 +57,22 @@ class Dom {
     }
   }
 
+  changeContainerOrientation(flexContainer, ships, orientation) {
+    if (orientation === "horizontal") {
+      flexContainer.style.flexDirection = "row";
+      for (let i = 0; i < ships.length; i++) {
+        ships[i].style.flexDirection = "column";
+      }
+    } else if (orientation === "vertical") {
+      flexContainer.style.flexDirection = "column";
+      for (let i = 0; i < ships.length; i++) {
+        ships[i].style.flexDirection = "row";
+      }
+    } else {
+      throw new Error("Not a valid orientation");
+    }
+  }
+
   #createPlayerInterface() {
     const mainSection = document.querySelector(".main-menu");
     const div = document.createElement("div");
@@ -181,6 +197,13 @@ class Dom {
       { name: "destroyer", size: 2 },
     ];
 
+    const innerShipsContainer = document.createElement("div");
+    innerShipsContainer.classList.add("inner-ships-container");
+    innerShipsContainer.style.display = "flex";
+    innerShipsContainer.style.flexDirection = "column";
+    innerShipsContainer.style.alignItems = "center";
+    innerShipsContainer.style.gap = ".5rem";
+
     for (let i = 0; i < ships.length; i++) {
       const shipDiv = document.createElement("div");
       shipDiv.classList.add("ship");
@@ -196,8 +219,15 @@ class Dom {
         shipCell.style.backgroundColor = "gray";
         shipDiv.appendChild(shipCell);
       }
-      shipsContainer.appendChild(shipDiv);
+      innerShipsContainer.appendChild(shipDiv);
     }
+
+    shipsContainer.appendChild(innerShipsContainer);
+
+    const orientationButton = document.createElement("button");
+    orientationButton.classList.add("orientation-button");
+    orientationButton.textContent = "horizontal";
+    shipsContainer.appendChild(orientationButton);
 
     for (let i = 0; i < max; i++) {
       const playerTwoGameboardRow = document.createElement("div");
@@ -222,7 +252,7 @@ class Dom {
   }
 
   isShipContainerInBounds(x, y, length, orientation) {
-    if (orientation) {
+    if (orientation === "horizontal") {
       for (let i = y; i < y + length; i++) {
         if (y + length > maxIndex + 1) {
           return false;
@@ -234,23 +264,18 @@ class Dom {
           return false;
         }
       }
+    } else {
+      throw new Error("Not a valid orientation");
     }
     return true;
   }
 
-  showShipInGameboard(
-    x,
-    y,
-    length,
-    nodeListMatrix,
-    playerBoard,
-    orientation = "horizontal"
-  ) {
+  showShipInGameboard(x, y, length, nodeListMatrix, playerBoard, orientation) {
     const shipBackgroundColor = "gray";
     if (x > maxIndex || y > maxIndex || x < 0 || y < 0) {
       return;
     } else {
-      if (orientation) {
+      if (orientation === "horizontal") {
         if (this.isShipContainerInBounds(x, y, length, orientation)) {
           for (let i = y; i < y + length; i++) {
             if (playerBoard[x][i] instanceof Ship) {
@@ -272,6 +297,15 @@ class Dom {
         }
       } else {
         return;
+      }
+    }
+  }
+
+  hideShips(nodeListMatrix) {
+    const originalBackgroundColor = "#fff";
+    for (let i = 0; i < nodeListMatrix.length; i++) {
+      for (let j = 0; j < nodeListMatrix[i].length; j++) {
+        nodeListMatrix[i][j].style.backgroundColor = originalBackgroundColor;
       }
     }
   }
