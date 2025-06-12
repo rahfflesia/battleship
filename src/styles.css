@@ -115,3 +115,8 @@ select {
   border-radius: 0.25rem;
   cursor: pointer;
 }
+
+.player1-cell,
+.player2-cell {
+  cursor: pointer;
+}

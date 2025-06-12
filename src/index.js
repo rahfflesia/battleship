@@ -2,8 +2,10 @@ import "./styles.css";
 import { Dom } from "./js/dom";
 import { NodeList } from "./js/nodelist";
 import { Player } from "./js/player";
+import { Turn } from "./js/turn";
 
 let orientation = "horizontal";
+let isGameReady = false;
 
 const dom = new Dom();
 document.querySelector(".play-button").addEventListener("click", function () {
@@ -56,7 +58,15 @@ playerOne.playerBoard.createGameboard();
 
 document.addEventListener("drop", (event) => {
   if (cellsOne) {
-    if (event.target.className !== "player1-cell") {
+    if (
+      event.target.className === "player2-cell" &&
+      !playerOne.playerBoard.haveAllShipsBeenPlaced()
+    ) {
+      dom.showModal(
+        "Error",
+        "Player one must place all their ships before player two can start placing theirs"
+      );
+    } else if (event.target.className !== "player1-cell") {
       dom.showModal("Error", "Cannot place ship out of board bounds");
     } else {
       event.preventDefault();
@@ -90,8 +100,8 @@ document.addEventListener("drop", (event) => {
 
       if (playerOne.playerBoard.haveAllShipsBeenPlaced()) {
         dom.showModal(
-          "Player1 has placed all their ships",
-          "Once all ships have been placed they are hid"
+          "All ships have been placed",
+          "Once all ships are placed they are hidden and you cannot place more"
         );
         dom.hideShips(nodeListMatrixPlayerOne);
       }
@@ -99,9 +109,7 @@ document.addEventListener("drop", (event) => {
   }
 });
 
-// Esto causa algunos problemas voy a tener que depurarlo
-// Player 2 gameboard
-/*const playerTwo = new Player("player2");
+const playerTwo = new Player("player2");
 playerTwo.playerBoard.createGameboard();
 
 const cellsTwo = document.querySelectorAll(".player2-cell");
@@ -111,9 +119,10 @@ document.addEventListener("dragover", (event) => {
 
 document.addEventListener("drop", (event) => {
   if (cellsTwo) {
-    if (event.target.className !== "player2-cell") {
-      dom.showModal("Error", "Cannot place ship out of board bounds");
-    } else {
+    if (
+      event.target.className === "player2-cell" &&
+      playerOne.playerBoard.haveAllShipsBeenPlaced()
+    ) {
       event.preventDefault();
       const shipData = event.dataTransfer.getData("text");
       const shipToPlace = document.getElementById(shipData);
@@ -142,6 +151,73 @@ document.addEventListener("drop", (event) => {
         playerTwo.playerBoard.board,
         orientation
       );
+
+      if (playerTwo.playerBoard.haveAllShipsBeenPlaced()) {
+        dom.showModal(
+          "All ships have been placed",
+          "Player two has placed all their ships you cannot place more ships"
+        );
+        dom.hideShips(nodeListMatrixPlayerTwo);
+      }
+    } else if (
+      event.target.className === "player2-cell" &&
+      !playerOne.playerBoard.haveAllShipsBeenPlaced()
+    ) {
+      dom.showModal(
+        "Error",
+        "Player one must place all their ships before player two can start placing theirs"
+      );
     }
   }
-});*/
+});
+
+document.addEventListener("click", (event) => {
+  const playButton = event.target.closest(".play-button-gameboards");
+  if (playButton) {
+    if (
+      playerOne.playerBoard.haveAllShipsBeenPlaced() &&
+      playerTwo.playerBoard.haveAllShipsBeenPlaced()
+    ) {
+      dom.removeNode(document.querySelector(".main-menu"), 1);
+      dom.removeNode(document.querySelector("body"), 7);
+      isGameReady = true;
+    } else {
+      dom.showModal(
+        "Error",
+        "Both players must have placed all their ships in order to play"
+      );
+    }
+  }
+});
+
+let currentTurn = playerOne;
+document.addEventListener("click", (event) => {
+  const cellsPlayerOne = event.target.closest(".player1-cell");
+  const cellsPlayerTwo = event.target.closest(".player2-cell");
+  const node = event.target;
+
+  if (cellsPlayerOne && isGameReady) {
+    if (currentTurn !== playerOne) {
+      const nodeList = document.querySelectorAll(".player1-cell");
+      const nodeListMatrixPlayerOne = NodeList.nodeListToMatrix(nodeList);
+      const coordinates = NodeList.getIndexOf(node, nodeListMatrixPlayerOne);
+      const x = coordinates["x"];
+      const y = coordinates["y"];
+      console.log(x, y);
+      playerOne.playerBoard.receiveAttack(x, y);
+      currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+    }
+  }
+
+  if (cellsPlayerTwo && isGameReady) {
+    if (currentTurn !== playerTwo) {
+      const nodeList = document.querySelectorAll(".player2-cell");
+      const nodeListMatrixPlayerTwo = NodeList.nodeListToMatrix(nodeList);
+      const coordinates = NodeList.getIndexOf(node, nodeListMatrixPlayerTwo);
+      const x = coordinates["x"];
+      const y = coordinates["y"];
+      playerTwo.playerBoard.receiveAttack(x, y);
+      currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+    }
+  }
+});

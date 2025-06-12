@@ -309,6 +309,16 @@ class Dom {
       }
     }
   }
+
+  removeNode(parent, nodeIndex) {
+    parent.removeChild(parent.childNodes[nodeIndex]);
+  }
+
+  disablePlayerboard(nodelist) {
+    for (let i = 0; i < nodelist.length; i++) {
+      nodelist[i].style.cursor = "not-allowed";
+    }
+  }
 }
 
 export { Dom };
