@@ -196,6 +196,9 @@ document.addEventListener("click", (event) => {
   const cellsPlayerTwo = event.target.closest(".player2-cell");
   const node = event.target;
 
+  const shipHitBackground = "#e69e9e";
+  const missBackground = "#809fbf";
+
   if (cellsPlayerOne && isGameReady) {
     if (currentTurn !== playerOne) {
       const nodeList = document.querySelectorAll(".player1-cell");
@@ -203,9 +206,19 @@ document.addEventListener("click", (event) => {
       const coordinates = NodeList.getIndexOf(node, nodeListMatrixPlayerOne);
       const x = coordinates["x"];
       const y = coordinates["y"];
-      console.log(x, y);
-      playerOne.playerBoard.receiveAttack(x, y);
-      currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+      if (playerOne.playerBoard.receiveAttack(x, y)) {
+        node.style.backgroundColor = shipHitBackground;
+      } else {
+        node.style.backgroundColor = missBackground;
+        currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+      }
+    }
+
+    if (
+      playerOne.playerBoard.areAllShipsSunk() ||
+      playerTwo.playerBoard.areAllShipsSunk()
+    ) {
+      console.log("Game over");
     }
   }
 
@@ -216,8 +229,19 @@ document.addEventListener("click", (event) => {
       const coordinates = NodeList.getIndexOf(node, nodeListMatrixPlayerTwo);
       const x = coordinates["x"];
       const y = coordinates["y"];
-      playerTwo.playerBoard.receiveAttack(x, y);
-      currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+      if (playerTwo.playerBoard.receiveAttack(x, y)) {
+        node.style.backgroundColor = shipHitBackground;
+      } else {
+        node.style.backgroundColor = missBackground;
+        currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+      }
+    }
+
+    if (
+      playerOne.playerBoard.areAllShipsSunk() ||
+      playerTwo.playerBoard.areAllShipsSunk()
+    ) {
+      console.log("Game over");
     }
   }
 });
