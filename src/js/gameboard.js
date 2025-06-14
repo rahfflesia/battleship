@@ -7,7 +7,7 @@ const dom = new Dom();
 
 class Gameboard {
   board = [];
-  missedShots = [];
+  cellsPlayed = [];
 
   createGameboard() {
     for (let i = 0; i < 10; i++) {
@@ -22,6 +22,12 @@ class Gameboard {
       const target = this.board[x][y];
       if (target instanceof Ship) {
         target.hit();
+        if (target.isSunk()) {
+          dom.showModal(
+            "Ship sunk",
+            "You have sunk a ship of length " + target.length
+          );
+        }
         return true;
       } else {
         this.board[x][y] = 0;
@@ -138,8 +144,20 @@ class Gameboard {
     }
   }
 
-  trackMissedShots(arr) {
-    this.missedShots.push(arr);
+  trackShots(coordinatesObj) {
+    this.cellsPlayed.push(coordinatesObj);
+  }
+
+  hasCellBeenPlayed(coordinatesObj) {
+    for (let i = 0; i < this.cellsPlayed.length; i++) {
+      if (
+        coordinatesObj["x"] === this.cellsPlayed[i]["x"] &&
+        coordinatesObj["y"] === this.cellsPlayed[i]["y"]
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   areAllShipsSunk() {

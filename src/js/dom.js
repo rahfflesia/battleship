@@ -5,6 +5,8 @@ const maxIndex = 9;
 class Dom {
   #modal = document.querySelector(".dialog");
   #mainMenu = document.querySelector(".main-menu");
+  usernameOneInputValue = "";
+  usernameTwoInputValue = "";
   // Too much repetition, might refactor later
   updateInterface() {
     const playerOneUsername = document.querySelector(".player1-username");
@@ -29,6 +31,16 @@ class Dom {
 
   isInputEmpty(input) {
     return input.value.length < 1;
+  }
+
+  setUsernameOne() {
+    this.usernameOneInputValue =
+      document.querySelector(".player1-username").value;
+  }
+
+  setUsernameTwo() {
+    this.usernameTwoInputValue =
+      document.querySelector(".player2-username").value;
   }
 
   #loadPlayerInterface() {
@@ -153,12 +165,14 @@ class Dom {
     }
 
     const playerOneGameboardTitle = document.createElement("span");
-    playerOneGameboardTitle.textContent = "Player1's gameboard";
+    playerOneGameboardTitle.textContent =
+      this.usernameOneInputValue + "'s gameboard";
     playerOneGameboardTitle.style.fontWeight = "bold";
     playerOneGameboardTitle.style.fontSize = "1.5rem";
 
     const playerTwoGameboardTitle = document.createElement("span");
-    playerTwoGameboardTitle.textContent = "Player2's gameboard";
+    playerTwoGameboardTitle.textContent =
+      this.usernameTwoInputValue + "'s gameboard";
     playerTwoGameboardTitle.style.fontWeight = "bold";
     playerTwoGameboardTitle.style.fontSize = "1.5rem";
 

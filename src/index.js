@@ -3,12 +3,20 @@ import { Dom } from "./js/dom";
 import { NodeList } from "./js/nodelist";
 import { Player } from "./js/player";
 import { Turn } from "./js/turn";
+import Boom from "./assets/sfx/boom.mp3";
+import Splash from "./assets/sfx/splash.mp3";
+import OST from "./assets/ost/ost.mp3";
 
 let orientation = "horizontal";
 let isGameReady = false;
 
+const shipHitSfx = new Audio(Boom);
+const splashSfx = new Audio(Splash);
+const backgroundMusic = new Audio(OST);
+
 const dom = new Dom();
 document.querySelector(".play-button").addEventListener("click", function () {
+  dom.setUsernameOne();
   dom.updateInterface();
 });
 
@@ -24,6 +32,7 @@ document.addEventListener("click", function (event) {
     if (dom.isInputEmpty(playerTwoUsername)) {
       dom.showModal("Error", "Player two username cannot be empty");
     } else {
+      dom.setUsernameTwo();
       dom.createGameboards();
     }
   }
@@ -53,7 +62,7 @@ document.addEventListener("dragover", (event) => {
   if (cellsOne) event.preventDefault();
 });
 
-const playerOne = new Player("player1");
+const playerOne = new Player(dom.usernameOneInputValue);
 playerOne.playerBoard.createGameboard();
 
 document.addEventListener("drop", (event) => {
@@ -109,7 +118,7 @@ document.addEventListener("drop", (event) => {
   }
 });
 
-const playerTwo = new Player("player2");
+const playerTwo = new Player(dom.usernameTwoInputValue);
 playerTwo.playerBoard.createGameboard();
 
 const cellsTwo = document.querySelectorAll(".player2-cell");
@@ -181,6 +190,8 @@ document.addEventListener("click", (event) => {
       dom.removeNode(document.querySelector(".main-menu"), 1);
       dom.removeNode(document.querySelector("body"), 7);
       isGameReady = true;
+      backgroundMusic.play();
+      backgroundMusic.loop = true;
     } else {
       dom.showModal(
         "Error",
@@ -199,49 +210,74 @@ document.addEventListener("click", (event) => {
   const shipHitBackground = "#e69e9e";
   const missBackground = "#809fbf";
 
+  const nodeListCellsPlayerOne = document.querySelectorAll(".player1-cell");
+  const nodeListCellsPlayerTwo = document.querySelectorAll(".player2-cell");
+
   if (cellsPlayerOne && isGameReady) {
     if (currentTurn !== playerOne) {
-      const nodeList = document.querySelectorAll(".player1-cell");
-      const nodeListMatrixPlayerOne = NodeList.nodeListToMatrix(nodeList);
+      const nodeListMatrixPlayerOne = NodeList.nodeListToMatrix(
+        nodeListCellsPlayerOne
+      );
       const coordinates = NodeList.getIndexOf(node, nodeListMatrixPlayerOne);
-      const x = coordinates["x"];
-      const y = coordinates["y"];
-      if (playerOne.playerBoard.receiveAttack(x, y)) {
-        node.style.backgroundColor = shipHitBackground;
+      if (!playerOne.playerBoard.hasCellBeenPlayed(coordinates)) {
+        if (
+          playerOne.playerBoard.receiveAttack(
+            coordinates["x"],
+            coordinates["y"]
+          )
+        ) {
+          node.style.backgroundColor = shipHitBackground;
+          shipHitSfx.play();
+        } else {
+          node.style.backgroundColor = missBackground;
+          splashSfx.play();
+          currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+        }
       } else {
-        node.style.backgroundColor = missBackground;
-        currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+        console.log("That cell has already been hit");
       }
+      playerOne.playerBoard.trackShots(coordinates);
     }
 
     if (
       playerOne.playerBoard.areAllShipsSunk() ||
       playerTwo.playerBoard.areAllShipsSunk()
     ) {
-      console.log("Game over");
+      dom.showModal("Game over", "The game has finished");
     }
   }
 
   if (cellsPlayerTwo && isGameReady) {
     if (currentTurn !== playerTwo) {
-      const nodeList = document.querySelectorAll(".player2-cell");
-      const nodeListMatrixPlayerTwo = NodeList.nodeListToMatrix(nodeList);
+      const nodeListMatrixPlayerTwo = NodeList.nodeListToMatrix(
+        nodeListCellsPlayerTwo
+      );
       const coordinates = NodeList.getIndexOf(node, nodeListMatrixPlayerTwo);
-      const x = coordinates["x"];
-      const y = coordinates["y"];
-      if (playerTwo.playerBoard.receiveAttack(x, y)) {
-        node.style.backgroundColor = shipHitBackground;
+      if (!playerTwo.playerBoard.hasCellBeenPlayed(coordinates)) {
+        if (
+          playerTwo.playerBoard.receiveAttack(
+            coordinates["x"],
+            coordinates["y"]
+          )
+        ) {
+          node.style.backgroundColor = shipHitBackground;
+          shipHitSfx.play();
+        } else {
+          node.style.backgroundColor = missBackground;
+          splashSfx.play();
+          currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+        }
       } else {
-        node.style.backgroundColor = missBackground;
-        currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
+        console.log("That cell has already been hit");
       }
+      playerTwo.playerBoard.trackShots(coordinates);
     }
 
     if (
       playerOne.playerBoard.areAllShipsSunk() ||
       playerTwo.playerBoard.areAllShipsSunk()
     ) {
-      console.log("Game over");
+      dom.showModal("Game over", "The game has finished");
     }
   }
 });
