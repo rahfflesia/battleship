@@ -47,7 +47,8 @@ body {
 .play-button,
 .next-button,
 .play-button-gameboards,
-.orientation-button {
+.orientation-button,
+.win-dialog:open > button {
   margin-top: 0.75rem;
   padding: 1rem 3rem;
   background-color: var(--background-color);
@@ -98,7 +99,8 @@ select {
   top: 10%;
 }
 
-.dialog::backdrop {
+.dialog::backdrop,
+.win-dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -119,4 +121,31 @@ select {
 .player1-cell,
 .player2-cell {
   cursor: pointer;
+}
+
+.turns {
+  margin-bottom: 1rem;
+  font-weight: bold;
+  font-size: 1.6rem;
+}
+
+.win-dialog:open {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  padding: 2rem;
+  gap: 1rem;
+  margin: 0 auto;
+  border-radius: 0.25rem;
+  top: 30%;
+}
+
+.win-dialog:open > div {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.win-dialog:open > h1 {
+  font-size: 3rem;
 }

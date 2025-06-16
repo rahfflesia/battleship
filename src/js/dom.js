@@ -59,6 +59,12 @@ class Dom {
     this.#modal.showModal();
   }
 
+  showWinModal(message) {
+    const winDialog = document.querySelector(".win-dialog");
+    document.querySelector(".winner").textContent = message;
+    winDialog.showModal();
+  }
+
   closeModal(container) {
     container.close();
   }
@@ -95,7 +101,7 @@ class Dom {
     playerTwoUsername.classList.add("player2-username");
 
     mainSection.style.border = "1px solid lightgray";
-    mainSection.style.padding = "1.5rem";
+    mainSection.style.padding = "1rem";
     mainSection.style.borderRadius = ".25rem";
 
     div.style.display = "flex";
@@ -128,7 +134,7 @@ class Dom {
 
     const mainSection = document.querySelector(".main-menu");
     mainSection.style.flexDirection = "row";
-    mainSection.style.gap = "1rem";
+    mainSection.style.gap = "2rem";
 
     const playerOneGameboardContainer = document.createElement("div");
     const playerOneGameboard = document.createElement("div");
@@ -143,7 +149,6 @@ class Dom {
     const playButtonGameboardsSection = document.createElement("button");
 
     playerOneGameboard.style.width = widthHeight;
-    playerOneGameboard.style.height = widthHeight;
 
     shipsContainer.style.display = "flex";
     shipsContainer.style.flexDirection = "column";
@@ -152,7 +157,6 @@ class Dom {
     shipsContainer.style.gap = ".5rem";
 
     playerTwoGameboard.style.width = widthHeight;
-    playerTwoGameboard.style.height = widthHeight;
 
     const nodes = [
       playerOneGameboardContainer,
@@ -185,12 +189,15 @@ class Dom {
       const playerOneGameboardRow = document.createElement("div");
       playerOneGameboardRow.classList.add("row");
       playerOneGameboardRow.style.display = "flex";
+      playerOneGameboardRow.style.gap = ".25rem";
+      playerOneGameboardRow.style.marginBottom = ".25rem";
       for (let j = 0; j < max; j++) {
         const playerOneGameboardCell = document.createElement("div");
         playerOneGameboardCell.classList.add("player1-cell");
         playerOneGameboardCell.style.width = widthHeightCell;
         playerOneGameboardCell.style.height = widthHeightCell;
         playerOneGameboardCell.style.border = "1px solid lightgray";
+        playerOneGameboardCell.style.borderRadius = ".25rem";
         playerOneGameboardRow.appendChild(playerOneGameboardCell);
       }
       playerOneGameboard.appendChild(playerOneGameboardRow);
@@ -216,7 +223,7 @@ class Dom {
     innerShipsContainer.style.display = "flex";
     innerShipsContainer.style.flexDirection = "column";
     innerShipsContainer.style.alignItems = "center";
-    innerShipsContainer.style.gap = ".5rem";
+    innerShipsContainer.style.gap = ".25rem";
 
     for (let i = 0; i < ships.length; i++) {
       const shipDiv = document.createElement("div");
@@ -224,13 +231,15 @@ class Dom {
       shipDiv.id = ships[i].name;
       shipDiv.draggable = "true";
       shipDiv.style.display = "flex";
+      shipDiv.style.gap = ".25rem";
       for (let j = 0; j < ships[i].size; j++) {
         const shipCell = document.createElement("div");
         shipCell.classList.add("ship-cell");
         shipCell.style.width = widthHeightCell;
         shipCell.style.height = widthHeightCell;
         shipCell.style.border = "1px solid lightgray";
-        shipCell.style.backgroundColor = "gray";
+        shipCell.style.borderRadius = ".25rem";
+        shipCell.style.backgroundColor = "#e3e2e1";
         shipDiv.appendChild(shipCell);
       }
       innerShipsContainer.appendChild(shipDiv);
@@ -247,12 +256,15 @@ class Dom {
       const playerTwoGameboardRow = document.createElement("div");
       playerTwoGameboardRow.classList.add("row");
       playerTwoGameboardRow.style.display = "flex";
+      playerTwoGameboardRow.style.gap = ".25rem";
+      playerTwoGameboardRow.style.marginBottom = ".25rem";
       for (let j = 0; j < max; j++) {
         const playerTwoGameboardCell = document.createElement("div");
         playerTwoGameboardCell.classList.add("player2-cell");
         playerTwoGameboardCell.style.width = widthHeightCell;
         playerTwoGameboardCell.style.height = widthHeightCell;
         playerTwoGameboardCell.style.border = "1px solid lightgray";
+        playerTwoGameboardCell.style.borderRadius = ".25rem";
         playerTwoGameboardRow.appendChild(playerTwoGameboardCell);
       }
       playerTwoGameboard.appendChild(playerTwoGameboardRow);
@@ -285,7 +297,7 @@ class Dom {
   }
 
   showShipInGameboard(x, y, length, nodeListMatrix, playerBoard, orientation) {
-    const shipBackgroundColor = "gray";
+    const shipBackgroundColor = "#e3e2e1";
     if (x > maxIndex || y > maxIndex || x < 0 || y < 0) {
       return;
     } else {
@@ -328,9 +340,23 @@ class Dom {
     parent.removeChild(parent.childNodes[nodeIndex]);
   }
 
-  disablePlayerboard(nodelist) {
-    for (let i = 0; i < nodelist.length; i++) {
-      nodelist[i].style.cursor = "not-allowed";
+  displayCurrentTurn(playerName) {
+    const currentTurnDiv = document.querySelector(".turns");
+    currentTurnDiv.textContent = playerName + "'s turn";
+  }
+
+  updateCellInNodelist(nodeListMatrix, playerBoard) {
+    const shipHitBackgroundColor = "#f7dadb";
+    const missBackgroundColor = "#c5e3fc";
+
+    for (let i = 0; i < nodeListMatrix.length; i++) {
+      for (let j = 0; j < nodeListMatrix[i].length; j++) {
+        if (playerBoard[i][j] instanceof Ship) {
+          nodeListMatrix[i][j].style.backgroundColor = shipHitBackgroundColor;
+        } else {
+          nodeListMatrix[i][j].style.backgroundColor = missBackgroundColor;
+        }
+      }
     }
   }
 }

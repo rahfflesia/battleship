@@ -22,11 +22,13 @@ class Gameboard {
       const target = this.board[x][y];
       if (target instanceof Ship) {
         target.hit();
-        if (target.isSunk()) {
+        if (target.isSunk() && this.getSunkShips() <= 4) {
           dom.showModal(
             "Ship sunk",
             "You have sunk a ship of length " + target.length
           );
+        } else if (this.getSunkShips() === 5) {
+          dom.closeModal(document.querySelector(".dialog"));
         }
         return true;
       } else {
@@ -171,6 +173,33 @@ class Gameboard {
       }
     }
     return true;
+  }
+
+  disableBoard(nodeListMatrix) {
+    for (let i = 0; i < this.board.length; i++) {
+      for (let j = 0; j < this.board[i].length; j++) {
+        const coordinatesObject = { x: i, y: j };
+        if (!this.hasCellBeenPlayed(coordinatesObject)) {
+          this.receiveAttack(i, j);
+          this.trackShots(coordinatesObject);
+          dom.updateCellInNodelist(nodeListMatrix, this.board);
+        }
+      }
+    }
+  }
+
+  getSunkShips() {
+    let shipsSunk = 0;
+    for (let i = 0; i < this.board.length; i++) {
+      for (let j = 0; j < this.board[i].length; j++) {
+        if (this.board[i][j] instanceof Ship) {
+          if (this.board[i][j].isSunk()) {
+            shipsSunk += 1 / this.board[i][j].length;
+          }
+        }
+      }
+    }
+    return Math.floor(shipsSunk);
   }
 }
 

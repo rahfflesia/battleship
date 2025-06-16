@@ -2,7 +2,9 @@ import { Gameboard } from "./gameboard";
 
 class Player {
   playerBoard = new Gameboard();
-  constructor(name) {
+  name = "";
+
+  setUsername(name) {
     this.name = name;
   }
 }

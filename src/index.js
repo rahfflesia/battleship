@@ -3,18 +3,14 @@ import { Dom } from "./js/dom";
 import { NodeList } from "./js/nodelist";
 import { Player } from "./js/player";
 import { Turn } from "./js/turn";
-import Boom from "./assets/sfx/boom.mp3";
-import Splash from "./assets/sfx/splash.mp3";
-import OST from "./assets/ost/ost.mp3";
+import { Sound } from "./js/sound";
 
 let orientation = "horizontal";
 let isGameReady = false;
 
-const shipHitSfx = new Audio(Boom);
-const splashSfx = new Audio(Splash);
-const backgroundMusic = new Audio(OST);
-
+const sound = new Sound();
 const dom = new Dom();
+
 document.querySelector(".play-button").addEventListener("click", function () {
   dom.setUsernameOne();
   dom.updateInterface();
@@ -62,7 +58,7 @@ document.addEventListener("dragover", (event) => {
   if (cellsOne) event.preventDefault();
 });
 
-const playerOne = new Player(dom.usernameOneInputValue);
+const playerOne = new Player("");
 playerOne.playerBoard.createGameboard();
 
 document.addEventListener("drop", (event) => {
@@ -95,8 +91,6 @@ document.addEventListener("drop", (event) => {
       const y = coordinates["y"];
       const shipLength = shipToPlace.childElementCount;
 
-      console.log(x, y);
-
       playerOne.playerBoard.place(x, y, shipLength, orientation);
       dom.showShipInGameboard(
         x,
@@ -118,7 +112,7 @@ document.addEventListener("drop", (event) => {
   }
 });
 
-const playerTwo = new Player(dom.usernameTwoInputValue);
+const playerTwo = new Player("");
 playerTwo.playerBoard.createGameboard();
 
 const cellsTwo = document.querySelectorAll(".player2-cell");
@@ -148,8 +142,6 @@ document.addEventListener("drop", (event) => {
       const x = coordinates["x"];
       const y = coordinates["y"];
       const shipLength = shipToPlace.childElementCount;
-
-      console.log(x, y);
 
       playerTwo.playerBoard.place(x, y, shipLength, orientation);
       dom.showShipInGameboard(
@@ -188,10 +180,12 @@ document.addEventListener("click", (event) => {
       playerTwo.playerBoard.haveAllShipsBeenPlaced()
     ) {
       dom.removeNode(document.querySelector(".main-menu"), 1);
-      dom.removeNode(document.querySelector("body"), 7);
+      dom.removeNode(document.querySelector("body"), 11);
       isGameReady = true;
-      backgroundMusic.play();
-      backgroundMusic.loop = true;
+      sound.playBackgroundMusic();
+      playerOne.setUsername(dom.usernameOneInputValue);
+      playerTwo.setUsername(dom.usernameTwoInputValue);
+      dom.displayCurrentTurn(playerOne.name);
     } else {
       dom.showModal(
         "Error",
@@ -207,8 +201,8 @@ document.addEventListener("click", (event) => {
   const cellsPlayerTwo = event.target.closest(".player2-cell");
   const node = event.target;
 
-  const shipHitBackground = "#e69e9e";
-  const missBackground = "#809fbf";
+  const shipHitBackgroundColor = "#f7dadb";
+  const missBackgroundColor = "#c5e3fc";
 
   const nodeListCellsPlayerOne = document.querySelectorAll(".player1-cell");
   const nodeListCellsPlayerTwo = document.querySelectorAll(".player2-cell");
@@ -226,24 +220,31 @@ document.addEventListener("click", (event) => {
             coordinates["y"]
           )
         ) {
-          node.style.backgroundColor = shipHitBackground;
-          shipHitSfx.play();
+          node.style.backgroundColor = shipHitBackgroundColor;
+          sound.playBoomSfx();
         } else {
-          node.style.backgroundColor = missBackground;
-          splashSfx.play();
+          node.style.backgroundColor = missBackgroundColor;
+          sound.playSplashSfx();
           currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
         }
       } else {
-        console.log("That cell has already been hit");
+        dom.showModal("Error", "That cell has already been hit");
       }
       playerOne.playerBoard.trackShots(coordinates);
+      dom.displayCurrentTurn(currentTurn.name);
     }
 
     if (
       playerOne.playerBoard.areAllShipsSunk() ||
       playerTwo.playerBoard.areAllShipsSunk()
     ) {
-      dom.showModal("Game over", "The game has finished");
+      dom.showWinModal(currentTurn.name + " has won");
+      playerOne.playerBoard.disableBoard(
+        NodeList.nodeListToMatrix(nodeListCellsPlayerOne)
+      );
+      playerTwo.playerBoard.disableBoard(
+        NodeList.nodeListToMatrix(nodeListCellsPlayerTwo)
+      );
     }
   }
 
@@ -260,24 +261,36 @@ document.addEventListener("click", (event) => {
             coordinates["y"]
           )
         ) {
-          node.style.backgroundColor = shipHitBackground;
-          shipHitSfx.play();
+          node.style.backgroundColor = shipHitBackgroundColor;
+          sound.playBoomSfx();
         } else {
-          node.style.backgroundColor = missBackground;
-          splashSfx.play();
+          node.style.backgroundColor = missBackgroundColor;
+          sound.playSplashSfx();
           currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
         }
       } else {
-        console.log("That cell has already been hit");
+        dom.showModal("Error", "That cell has already been hit");
       }
       playerTwo.playerBoard.trackShots(coordinates);
+      console.log(playerTwo.playerBoard.getSunkShips());
+      dom.displayCurrentTurn(currentTurn.name);
     }
 
     if (
       playerOne.playerBoard.areAllShipsSunk() ||
       playerTwo.playerBoard.areAllShipsSunk()
     ) {
-      dom.showModal("Game over", "The game has finished");
+      dom.showWinModal(currentTurn.name + " has won");
+      playerOne.playerBoard.disableBoard(
+        NodeList.nodeListToMatrix(nodeListCellsPlayerOne)
+      );
+      playerTwo.playerBoard.disableBoard(
+        NodeList.nodeListToMatrix(nodeListCellsPlayerTwo)
+      );
     }
   }
+});
+
+document.querySelector(".win-dialog").addEventListener("cancel", (event) => {
+  event.preventDefault();
 });
