@@ -11,9 +11,12 @@ let isGameReady = false;
 const sound = new Sound();
 const dom = new Dom();
 
-document.querySelector(".play-button").addEventListener("click", function () {
-  dom.setUsernameOne();
-  dom.updateInterface();
+document.addEventListener("click", (event) => {
+  const playButton = event.target.closest(".play-button");
+  if (playButton) {
+    dom.setUsernameOne();
+    dom.updateInterface();
+  }
 });
 
 document.querySelector(".close-modal").addEventListener("click", () => {
@@ -71,9 +74,20 @@ document.addEventListener("drop", (event) => {
         "Error",
         "Player one must place all their ships before player two can start placing theirs"
       );
-    } else if (event.target.className !== "player1-cell") {
+    } else if (
+      event.target.className !== "player1-cell" &&
+      event.target.className !== "player2-cell"
+    ) {
       dom.showModal("Error", "Cannot place ship out of board bounds");
-    } else {
+    } else if (
+      event.target.className === "player1-cell" &&
+      playerOne.playerBoard.haveAllShipsBeenPlaced()
+    ) {
+      dom.showModal("Error", "Player one has placed all their ships already");
+    } else if (
+      event.target.className === "player1-cell" &&
+      !playerOne.playerBoard.haveAllShipsBeenPlaced()
+    ) {
       event.preventDefault();
       const shipData = event.dataTransfer.getData("text");
       const shipToPlace = document.getElementById(shipData);
@@ -123,6 +137,11 @@ document.addEventListener("dragover", (event) => {
 document.addEventListener("drop", (event) => {
   if (cellsTwo) {
     if (
+      event.target.className === "player2-cell" &&
+      playerTwo.playerBoard.haveAllShipsBeenPlaced()
+    ) {
+      dom.showModal("Error", "Player two has placed all their ships already");
+    } else if (
       event.target.className === "player2-cell" &&
       playerOne.playerBoard.haveAllShipsBeenPlaced()
     ) {
@@ -231,6 +250,7 @@ document.addEventListener("click", (event) => {
         dom.showModal("Error", "That cell has already been hit");
       }
       playerOne.playerBoard.trackShots(coordinates);
+      console.log(playerOne.playerBoard.getSunkShips());
       dom.displayCurrentTurn(currentTurn.name);
     }
 
@@ -293,4 +313,19 @@ document.addEventListener("click", (event) => {
 
 document.querySelector(".win-dialog").addEventListener("cancel", (event) => {
   event.preventDefault();
+});
+
+document.addEventListener("click", (event) => {
+  const playAgainButton = event.target.closest(".play-again");
+  if (playAgainButton) {
+    playerOne.playerBoard.resetGameBoard();
+    playerTwo.playerBoard.resetGameBoard();
+    dom.loadStartScreen();
+    dom.closeModal(document.querySelector(".win-dialog"));
+    dom.clearText(document.querySelector(".turns"));
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  dom.clearInput(document.querySelector(".player1-username"));
 });

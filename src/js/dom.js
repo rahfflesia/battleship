@@ -1,4 +1,5 @@
 import { Ship } from "./ship";
+import { Sound } from "./sound";
 
 const maxIndex = 9;
 
@@ -7,7 +8,7 @@ class Dom {
   #mainMenu = document.querySelector(".main-menu");
   usernameOneInputValue = "";
   usernameTwoInputValue = "";
-  // Too much repetition, might refactor later
+
   updateInterface() {
     const playerOneUsername = document.querySelector(".player1-username");
     const select = document.querySelector(".options");
@@ -33,6 +34,10 @@ class Dom {
     return input.value.length < 1;
   }
 
+  clearInput(input) {
+    input.value = "";
+  }
+
   setUsernameOne() {
     this.usernameOneInputValue =
       document.querySelector(".player1-username").value;
@@ -51,6 +56,10 @@ class Dom {
   #loadComputerInterface() {
     this.#removeAllChilds(this.#mainMenu);
     this.#createComputerInterface();
+  }
+
+  clearText(container) {
+    container.textContent = "";
   }
 
   showModal(title, message) {
@@ -99,14 +108,8 @@ class Dom {
     const nextButton = document.createElement("button");
 
     playerTwoUsername.classList.add("player2-username");
-
-    mainSection.style.border = "1px solid lightgray";
-    mainSection.style.padding = "1rem";
-    mainSection.style.borderRadius = ".25rem";
-
-    div.style.display = "flex";
-    div.style.flexDirection = "column";
-    div.style.gap = ".25rem";
+    mainSection.classList.add("main-section");
+    div.classList.add("div");
 
     mainSection.appendChild(div);
     const nodes = [infoSpan, playerTwoUsername, nextButton];
@@ -115,9 +118,8 @@ class Dom {
       div.appendChild(nodes[i]);
     }
 
+    infoSpan.classList.add("info-span");
     infoSpan.textContent = "Player 2 username";
-    infoSpan.style.fontWeight = "bold";
-    infoSpan.style.fontSize = "1.5rem";
 
     nextButton.classList.add("next-button");
     nextButton.textContent = "Next";
@@ -125,38 +127,32 @@ class Dom {
 
   #createComputerInterface() {}
 
+  createPlayerTitle(container, username) {
+    container.textContent = username + "'s gameboard";
+    container.classList.add("info-span");
+  }
+
   createGameboards() {
     const max = 10;
-    const widthHeight = "400px";
     this.#removeAllChilds(this.#mainMenu);
 
     const body = document.querySelector("body");
 
     const mainSection = document.querySelector(".main-menu");
-    mainSection.style.flexDirection = "row";
-    mainSection.style.gap = "2rem";
+    mainSection.classList.add("main-section-direction");
 
     const playerOneGameboardContainer = document.createElement("div");
     const playerOneGameboard = document.createElement("div");
     playerOneGameboard.classList.add("gameboard");
 
     const shipsContainer = document.createElement("div");
+    shipsContainer.classList.add("ships-container");
 
     const playerTwoGameboardContainer = document.createElement("div");
     const playerTwoGameboard = document.createElement("div");
     playerTwoGameboard.classList.add("gameboard");
 
     const playButtonGameboardsSection = document.createElement("button");
-
-    playerOneGameboard.style.width = widthHeight;
-
-    shipsContainer.style.display = "flex";
-    shipsContainer.style.flexDirection = "column";
-    shipsContainer.style.justifyContent = "center";
-    shipsContainer.style.alignItems = "center";
-    shipsContainer.style.gap = ".5rem";
-
-    playerTwoGameboard.style.width = widthHeight;
 
     const nodes = [
       playerOneGameboardContainer,
@@ -169,16 +165,10 @@ class Dom {
     }
 
     const playerOneGameboardTitle = document.createElement("span");
-    playerOneGameboardTitle.textContent =
-      this.usernameOneInputValue + "'s gameboard";
-    playerOneGameboardTitle.style.fontWeight = "bold";
-    playerOneGameboardTitle.style.fontSize = "1.5rem";
+    this.createPlayerTitle(playerOneGameboardTitle, this.usernameOneInputValue);
 
     const playerTwoGameboardTitle = document.createElement("span");
-    playerTwoGameboardTitle.textContent =
-      this.usernameTwoInputValue + "'s gameboard";
-    playerTwoGameboardTitle.style.fontWeight = "bold";
-    playerTwoGameboardTitle.style.fontSize = "1.5rem";
+    this.createPlayerTitle(playerTwoGameboardTitle, this.usernameTwoInputValue);
 
     playerOneGameboardContainer.appendChild(playerOneGameboardTitle);
     playerTwoGameboardContainer.appendChild(playerTwoGameboardTitle);
@@ -188,16 +178,9 @@ class Dom {
     for (let i = 0; i < max; i++) {
       const playerOneGameboardRow = document.createElement("div");
       playerOneGameboardRow.classList.add("row");
-      playerOneGameboardRow.style.display = "flex";
-      playerOneGameboardRow.style.gap = ".25rem";
-      playerOneGameboardRow.style.marginBottom = ".25rem";
       for (let j = 0; j < max; j++) {
         const playerOneGameboardCell = document.createElement("div");
         playerOneGameboardCell.classList.add("player1-cell");
-        playerOneGameboardCell.style.width = widthHeightCell;
-        playerOneGameboardCell.style.height = widthHeightCell;
-        playerOneGameboardCell.style.border = "1px solid lightgray";
-        playerOneGameboardCell.style.borderRadius = ".25rem";
         playerOneGameboardRow.appendChild(playerOneGameboardCell);
       }
       playerOneGameboard.appendChild(playerOneGameboardRow);
@@ -220,26 +203,15 @@ class Dom {
 
     const innerShipsContainer = document.createElement("div");
     innerShipsContainer.classList.add("inner-ships-container");
-    innerShipsContainer.style.display = "flex";
-    innerShipsContainer.style.flexDirection = "column";
-    innerShipsContainer.style.alignItems = "center";
-    innerShipsContainer.style.gap = ".25rem";
 
     for (let i = 0; i < ships.length; i++) {
       const shipDiv = document.createElement("div");
       shipDiv.classList.add("ship");
       shipDiv.id = ships[i].name;
       shipDiv.draggable = "true";
-      shipDiv.style.display = "flex";
-      shipDiv.style.gap = ".25rem";
       for (let j = 0; j < ships[i].size; j++) {
         const shipCell = document.createElement("div");
         shipCell.classList.add("ship-cell");
-        shipCell.style.width = widthHeightCell;
-        shipCell.style.height = widthHeightCell;
-        shipCell.style.border = "1px solid lightgray";
-        shipCell.style.borderRadius = ".25rem";
-        shipCell.style.backgroundColor = "#e3e2e1";
         shipDiv.appendChild(shipCell);
       }
       innerShipsContainer.appendChild(shipDiv);
@@ -255,16 +227,9 @@ class Dom {
     for (let i = 0; i < max; i++) {
       const playerTwoGameboardRow = document.createElement("div");
       playerTwoGameboardRow.classList.add("row");
-      playerTwoGameboardRow.style.display = "flex";
-      playerTwoGameboardRow.style.gap = ".25rem";
-      playerTwoGameboardRow.style.marginBottom = ".25rem";
       for (let j = 0; j < max; j++) {
         const playerTwoGameboardCell = document.createElement("div");
         playerTwoGameboardCell.classList.add("player2-cell");
-        playerTwoGameboardCell.style.width = widthHeightCell;
-        playerTwoGameboardCell.style.height = widthHeightCell;
-        playerTwoGameboardCell.style.border = "1px solid lightgray";
-        playerTwoGameboardCell.style.borderRadius = ".25rem";
         playerTwoGameboardRow.appendChild(playerTwoGameboardCell);
       }
       playerTwoGameboard.appendChild(playerTwoGameboardRow);
@@ -275,6 +240,93 @@ class Dom {
     playButtonGameboardsSection.textContent = "Play";
     playButtonGameboardsSection.classList.add("play-button-gameboards");
     body.appendChild(playButtonGameboardsSection);
+  }
+
+  createFirstChildLoadScreen() {
+    const playerOneOptions = document.createElement("div");
+    playerOneOptions.classList.add("player-1-options");
+
+    const span = document.createElement("span");
+    span.classList.add("span");
+    span.textContent = "Player 1 username";
+
+    const input = document.createElement("input");
+    input.classList.add("player1-username");
+
+    const playerOneOptionsChildren = [span, input];
+    for (let i = 0; i < playerOneOptionsChildren.length; i++) {
+      playerOneOptions.appendChild(playerOneOptionsChildren[i]);
+    }
+
+    return playerOneOptions;
+  }
+
+  createSecondChildLoadScreen() {
+    const playerTwoOptions = document.createElement("div");
+    playerTwoOptions.classList.add("player-2-options");
+
+    const playerTwoSpan = document.createElement("span");
+    playerTwoSpan.classList.add("span");
+    playerTwoSpan.textContent = "Select the type of player";
+
+    const select = document.createElement("select");
+    select.classList.add("options");
+
+    const playerOption = document.createElement("option");
+    playerOption.textContent = "Player";
+    playerOption.value = "Player";
+
+    const computerOption = document.createElement("option");
+    computerOption.textContent = "Computer";
+    computerOption.value = "Computer";
+
+    const selectChildren = [playerOption, computerOption];
+    for (let i = 0; i < selectChildren.length; i++) {
+      select.appendChild(selectChildren[i]);
+    }
+
+    const playerTwoOptionsChildren = [playerTwoSpan, select];
+    for (let i = 0; i < playerTwoOptionsChildren.length; i++) {
+      playerTwoOptions.appendChild(playerTwoOptionsChildren[i]);
+    }
+
+    return playerTwoOptions;
+  }
+
+  createButtonContainerLoadScreen() {
+    const buttonContainer = document.createElement("div");
+    buttonContainer.classList.add("btn-container");
+
+    const playButton = document.createElement("button");
+    playButton.classList.add("play-button");
+    playButton.textContent = "Play";
+
+    buttonContainer.appendChild(playButton);
+
+    return buttonContainer;
+  }
+
+  loadStartScreen() {
+    const sound = new Sound();
+    sound.pauseBackgroundMusic();
+
+    const mainContainer = document.querySelector(".main-menu");
+    this.#removeAllChilds(mainContainer);
+    mainContainer.classList.add("main-container-start-screen");
+
+    const mainContentContainer = document.createElement("div");
+    mainContentContainer.classList.add("main-content-container");
+
+    const playerOneOptions = this.createFirstChildLoadScreen();
+    mainContentContainer.appendChild(playerOneOptions);
+
+    const playerTwoOptions = this.createSecondChildLoadScreen();
+    mainContentContainer.appendChild(playerTwoOptions);
+
+    const buttonContainer = this.createButtonContainerLoadScreen();
+
+    mainContainer.appendChild(mainContentContainer);
+    mainContainer.appendChild(buttonContainer);
   }
 
   isShipContainerInBounds(x, y, length, orientation) {

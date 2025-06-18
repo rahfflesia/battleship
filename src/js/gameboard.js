@@ -201,6 +201,15 @@ class Gameboard {
     }
     return Math.floor(shipsSunk);
   }
+
+  removeShips() {
+    this.createGameboard();
+  }
+
+  resetGameBoard() {
+    this.cellsPlayed = [];
+    this.removeShips();
+  }
 }
 
 export { Gameboard };

@@ -3,6 +3,7 @@
 :root {
   --font-color: #fff;
   --background-color: black;
+  --default-size: 40px;
 }
 
 * {
@@ -121,6 +122,10 @@ select {
 .player1-cell,
 .player2-cell {
   cursor: pointer;
+  width: var(--default-size);
+  height: var(--default-size);
+  border: 1px solid lightgray;
+  border-radius: 0.25rem;
 }
 
 .turns {
@@ -148,4 +153,68 @@ select {
 
 .win-dialog:open > h1 {
   font-size: 3rem;
+}
+
+/* Dinamically created components */
+.div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.main-section {
+  border: 1px solid lightgray;
+  padding: 1rem;
+  border-radius: 0.25rem;
+}
+
+.info-span {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.main-section-direction {
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.ships-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.main-container-start-screen {
+  display: flex;
+  flex-direction: column;
+  border: none;
+  gap: 0.25rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.inner-ships-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ship-cell {
+  width: var(--default-size);
+  height: var(--default-size);
+  border: 1px solid lightgray;
+  border-radius: 0.25rem;
+  background-color: #e3e2e1;
+}
+
+.ship {
+  display: flex;
+  gap: 0.25rem;
 }
