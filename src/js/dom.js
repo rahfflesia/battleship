@@ -132,8 +132,52 @@ class Dom {
     container.classList.add("info-span");
   }
 
+  createGameboardGrid(containerToAppend, isPlayerOne) {
+    for (let i = 0; i < maxIndex + 1; i++) {
+      const playerGameboardRow = document.createElement("div");
+      playerGameboardRow.classList.add("row");
+      for (let j = 0; j < maxIndex + 1; j++) {
+        const playerGameboardCell = document.createElement("div");
+        if (isPlayerOne) {
+          playerGameboardCell.classList.add("player1-cell");
+        } else {
+          playerGameboardCell.classList.add("player2-cell");
+        }
+        playerGameboardRow.appendChild(playerGameboardCell);
+      }
+      containerToAppend.appendChild(playerGameboardRow);
+    }
+  }
+
+  createShipsSection() {
+    const ships = [
+      { name: "carrier", size: 5 },
+      { name: "battleship", size: 4 },
+      { name: "cruiser", size: 3 },
+      { name: "submarine", size: 3 },
+      { name: "destroyer", size: 2 },
+    ];
+
+    const innerShipsContainer = document.createElement("div");
+    innerShipsContainer.classList.add("inner-ships-container");
+
+    for (let i = 0; i < ships.length; i++) {
+      const shipDiv = document.createElement("div");
+      shipDiv.classList.add("ship");
+      shipDiv.id = ships[i].name;
+      shipDiv.draggable = "true";
+      for (let j = 0; j < ships[i].size; j++) {
+        const shipCell = document.createElement("div");
+        shipCell.classList.add("ship-cell");
+        shipDiv.appendChild(shipCell);
+      }
+      innerShipsContainer.appendChild(shipDiv);
+    }
+
+    return innerShipsContainer;
+  }
+
   createGameboards() {
-    const max = 10;
     this.#removeAllChilds(this.#mainMenu);
 
     const body = document.querySelector("body");
@@ -173,18 +217,7 @@ class Dom {
     playerOneGameboardContainer.appendChild(playerOneGameboardTitle);
     playerTwoGameboardContainer.appendChild(playerTwoGameboardTitle);
 
-    const widthHeightCell = "40px";
-
-    for (let i = 0; i < max; i++) {
-      const playerOneGameboardRow = document.createElement("div");
-      playerOneGameboardRow.classList.add("row");
-      for (let j = 0; j < max; j++) {
-        const playerOneGameboardCell = document.createElement("div");
-        playerOneGameboardCell.classList.add("player1-cell");
-        playerOneGameboardRow.appendChild(playerOneGameboardCell);
-      }
-      playerOneGameboard.appendChild(playerOneGameboardRow);
-    }
+    this.createGameboardGrid(playerOneGameboard, true);
 
     playerOneGameboardContainer.appendChild(playerOneGameboard);
 
@@ -193,29 +226,7 @@ class Dom {
       "Drag and drop the ships to their respective locations";
     shipsContainer.appendChild(message);
 
-    const ships = [
-      { name: "carrier", size: 5 },
-      { name: "battleship", size: 4 },
-      { name: "cruiser", size: 3 },
-      { name: "submarine", size: 3 },
-      { name: "destroyer", size: 2 },
-    ];
-
-    const innerShipsContainer = document.createElement("div");
-    innerShipsContainer.classList.add("inner-ships-container");
-
-    for (let i = 0; i < ships.length; i++) {
-      const shipDiv = document.createElement("div");
-      shipDiv.classList.add("ship");
-      shipDiv.id = ships[i].name;
-      shipDiv.draggable = "true";
-      for (let j = 0; j < ships[i].size; j++) {
-        const shipCell = document.createElement("div");
-        shipCell.classList.add("ship-cell");
-        shipDiv.appendChild(shipCell);
-      }
-      innerShipsContainer.appendChild(shipDiv);
-    }
+    const innerShipsContainer = this.createShipsSection();
 
     shipsContainer.appendChild(innerShipsContainer);
 
@@ -224,16 +235,7 @@ class Dom {
     orientationButton.textContent = "horizontal";
     shipsContainer.appendChild(orientationButton);
 
-    for (let i = 0; i < max; i++) {
-      const playerTwoGameboardRow = document.createElement("div");
-      playerTwoGameboardRow.classList.add("row");
-      for (let j = 0; j < max; j++) {
-        const playerTwoGameboardCell = document.createElement("div");
-        playerTwoGameboardCell.classList.add("player2-cell");
-        playerTwoGameboardRow.appendChild(playerTwoGameboardCell);
-      }
-      playerTwoGameboard.appendChild(playerTwoGameboardRow);
-    }
+    this.createGameboardGrid(playerTwoGameboard, false);
 
     playerTwoGameboardContainer.appendChild(playerTwoGameboard);
 

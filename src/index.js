@@ -1,8 +1,7 @@
 import "./styles.css";
 import { Dom } from "./js/dom";
-import { NodeList } from "./js/nodelist";
 import { Player } from "./js/player";
-import { Turn } from "./js/turn";
+import { Game } from "./js/game";
 import { Sound } from "./js/sound";
 
 let orientation = "horizontal";
@@ -88,40 +87,7 @@ document.addEventListener("drop", (event) => {
       event.target.className === "player1-cell" &&
       !playerOne.playerBoard.haveAllShipsBeenPlaced()
     ) {
-      event.preventDefault();
-      const shipData = event.dataTransfer.getData("text");
-      const shipToPlace = document.getElementById(shipData);
-
-      const cellsPlayerOne = document.querySelectorAll(".player1-cell");
-      const nodeListMatrixPlayerOne = NodeList.nodeListToMatrix(cellsPlayerOne);
-      const targetCell = event.target;
-
-      const coordinates = NodeList.getIndexOf(
-        targetCell,
-        nodeListMatrixPlayerOne
-      );
-
-      const x = coordinates["x"];
-      const y = coordinates["y"];
-      const shipLength = shipToPlace.childElementCount;
-
-      playerOne.playerBoard.place(x, y, shipLength, orientation);
-      dom.showShipInGameboard(
-        x,
-        y,
-        shipLength,
-        nodeListMatrixPlayerOne,
-        playerOne.playerBoard.board,
-        orientation
-      );
-
-      if (playerOne.playerBoard.haveAllShipsBeenPlaced()) {
-        dom.showModal(
-          "All ships have been placed",
-          "Once all ships are placed they are hidden and you cannot place more"
-        );
-        dom.hideShips(nodeListMatrixPlayerOne);
-      }
+      Game.place(event, ".player1-cell", playerOne, dom, orientation);
     }
   }
 });
@@ -145,40 +111,7 @@ document.addEventListener("drop", (event) => {
       event.target.className === "player2-cell" &&
       playerOne.playerBoard.haveAllShipsBeenPlaced()
     ) {
-      event.preventDefault();
-      const shipData = event.dataTransfer.getData("text");
-      const shipToPlace = document.getElementById(shipData);
-
-      const cellsPlayerTwo = document.querySelectorAll(".player2-cell");
-      const nodeListMatrixPlayerTwo = NodeList.nodeListToMatrix(cellsPlayerTwo);
-      const targetCell = event.target;
-
-      const coordinates = NodeList.getIndexOf(
-        targetCell,
-        nodeListMatrixPlayerTwo
-      );
-
-      const x = coordinates["x"];
-      const y = coordinates["y"];
-      const shipLength = shipToPlace.childElementCount;
-
-      playerTwo.playerBoard.place(x, y, shipLength, orientation);
-      dom.showShipInGameboard(
-        x,
-        y,
-        shipLength,
-        nodeListMatrixPlayerTwo,
-        playerTwo.playerBoard.board,
-        orientation
-      );
-
-      if (playerTwo.playerBoard.haveAllShipsBeenPlaced()) {
-        dom.showModal(
-          "All ships have been placed",
-          "Player two has placed all their ships you cannot place more ships"
-        );
-        dom.hideShips(nodeListMatrixPlayerTwo);
-      }
+      Game.place(event, ".player2-cell", playerTwo, dom, orientation);
     } else if (
       event.target.className === "player2-cell" &&
       !playerOne.playerBoard.haveAllShipsBeenPlaced()
@@ -215,99 +148,19 @@ document.addEventListener("click", (event) => {
 });
 
 let currentTurn = playerOne;
+const gameData = { player1: playerOne, player2: playerTwo };
+
 document.addEventListener("click", (event) => {
   const cellsPlayerOne = event.target.closest(".player1-cell");
   const cellsPlayerTwo = event.target.closest(".player2-cell");
   const node = event.target;
 
-  const shipHitBackgroundColor = "#f7dadb";
-  const missBackgroundColor = "#c5e3fc";
-
-  const nodeListCellsPlayerOne = document.querySelectorAll(".player1-cell");
-  const nodeListCellsPlayerTwo = document.querySelectorAll(".player2-cell");
-
   if (cellsPlayerOne && isGameReady) {
-    if (currentTurn !== playerOne) {
-      const nodeListMatrixPlayerOne = NodeList.nodeListToMatrix(
-        nodeListCellsPlayerOne
-      );
-      const coordinates = NodeList.getIndexOf(node, nodeListMatrixPlayerOne);
-      if (!playerOne.playerBoard.hasCellBeenPlayed(coordinates)) {
-        if (
-          playerOne.playerBoard.receiveAttack(
-            coordinates["x"],
-            coordinates["y"]
-          )
-        ) {
-          node.style.backgroundColor = shipHitBackgroundColor;
-          sound.playBoomSfx();
-        } else {
-          node.style.backgroundColor = missBackgroundColor;
-          sound.playSplashSfx();
-          currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
-        }
-      } else {
-        dom.showModal("Error", "That cell has already been hit");
-      }
-      playerOne.playerBoard.trackShots(coordinates);
-      console.log(playerOne.playerBoard.getSunkShips());
-      dom.displayCurrentTurn(currentTurn.name);
-    }
-
-    if (
-      playerOne.playerBoard.areAllShipsSunk() ||
-      playerTwo.playerBoard.areAllShipsSunk()
-    ) {
-      dom.showWinModal(currentTurn.name + " has won");
-      playerOne.playerBoard.disableBoard(
-        NodeList.nodeListToMatrix(nodeListCellsPlayerOne)
-      );
-      playerTwo.playerBoard.disableBoard(
-        NodeList.nodeListToMatrix(nodeListCellsPlayerTwo)
-      );
-    }
+    currentTurn = Game.play(playerOne, gameData, node, currentTurn);
   }
 
   if (cellsPlayerTwo && isGameReady) {
-    if (currentTurn !== playerTwo) {
-      const nodeListMatrixPlayerTwo = NodeList.nodeListToMatrix(
-        nodeListCellsPlayerTwo
-      );
-      const coordinates = NodeList.getIndexOf(node, nodeListMatrixPlayerTwo);
-      if (!playerTwo.playerBoard.hasCellBeenPlayed(coordinates)) {
-        if (
-          playerTwo.playerBoard.receiveAttack(
-            coordinates["x"],
-            coordinates["y"]
-          )
-        ) {
-          node.style.backgroundColor = shipHitBackgroundColor;
-          sound.playBoomSfx();
-        } else {
-          node.style.backgroundColor = missBackgroundColor;
-          sound.playSplashSfx();
-          currentTurn = Turn.checkTurn(currentTurn, playerOne, playerTwo);
-        }
-      } else {
-        dom.showModal("Error", "That cell has already been hit");
-      }
-      playerTwo.playerBoard.trackShots(coordinates);
-      console.log(playerTwo.playerBoard.getSunkShips());
-      dom.displayCurrentTurn(currentTurn.name);
-    }
-
-    if (
-      playerOne.playerBoard.areAllShipsSunk() ||
-      playerTwo.playerBoard.areAllShipsSunk()
-    ) {
-      dom.showWinModal(currentTurn.name + " has won");
-      playerOne.playerBoard.disableBoard(
-        NodeList.nodeListToMatrix(nodeListCellsPlayerOne)
-      );
-      playerTwo.playerBoard.disableBoard(
-        NodeList.nodeListToMatrix(nodeListCellsPlayerTwo)
-      );
-    }
+    currentTurn = Game.play(playerTwo, gameData, node, currentTurn);
   }
 });
 
