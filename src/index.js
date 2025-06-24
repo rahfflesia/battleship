@@ -15,6 +15,12 @@ document.addEventListener("click", (event) => {
   if (playButton) {
     dom.setUsernameOne();
     dom.updateInterface();
+
+    const mainMenu = document.querySelector(".main-menu");
+    if (mainMenu.classList.contains("main-section-direction")) {
+      const classes = ["main-section-direction", "main-container-start-screen"];
+      dom.removeClasses(mainMenu, classes);
+    }
   }
 });
 

@@ -84,6 +84,10 @@ class Dom {
     }
   }
 
+  removeClasses(container, classes) {
+    container.classList.remove(...classes);
+  }
+
   changeContainerOrientation(flexContainer, ships, orientation) {
     if (orientation === "horizontal") {
       flexContainer.style.flexDirection = "row";
