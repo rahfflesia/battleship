@@ -3,16 +3,21 @@ import { Dom } from "./js/dom";
 import { Player } from "./js/player";
 import { Game } from "./js/game";
 import { Sound } from "./js/sound";
+import { Computer } from "./js/computer";
+import { Turn } from "./js/turn";
+import { NodeList } from "./js/nodelist";
 
 let orientation = "horizontal";
 let isGameReady = false;
 
 const sound = new Sound();
 const dom = new Dom();
+let selectedOption = "";
 
 document.addEventListener("click", (event) => {
   const playButton = event.target.closest(".play-button");
   if (playButton) {
+    selectedOption = dom.getSelectValue();
     dom.setUsernameOne();
     dom.updateInterface();
 
@@ -37,7 +42,7 @@ document.addEventListener("click", function (event) {
       dom.showModal("Error", "Player two username cannot be empty");
     } else {
       dom.setUsernameTwo();
-      dom.createGameboards();
+      dom.createGameboards(false, true);
     }
   }
 
@@ -130,6 +135,11 @@ document.addEventListener("drop", (event) => {
   }
 });
 
+const computer = new Computer();
+computer.playerBoard.createGameboard();
+computer.setUsername("Computer");
+
+// Stacked lol
 document.addEventListener("click", (event) => {
   const playButton = event.target.closest(".play-button-gameboards");
   if (playButton) {
@@ -143,6 +153,19 @@ document.addEventListener("click", (event) => {
       sound.playBackgroundMusic();
       playerOne.setUsername(dom.usernameOneInputValue);
       playerTwo.setUsername(dom.usernameTwoInputValue);
+      dom.displayCurrentTurn(playerOne.name);
+    } else if (
+      playerOne.playerBoard.haveAllShipsBeenPlaced() &&
+      selectedOption === "Computer"
+    ) {
+      isGameReady = true;
+      playerOne.setUsername(dom.usernameOneInputValue);
+      dom.setComputerUsername(computer);
+      dom.createGameboards(false, false, true);
+      dom.removeNode(document.querySelector("body"), 11);
+      dom.removeNode(document.querySelector(".main-menu"), 1);
+      computer.placeShips();
+      sound.playBackgroundMusic();
       dom.displayCurrentTurn(playerOne.name);
     } else {
       dom.showModal(
@@ -161,12 +184,109 @@ document.addEventListener("click", (event) => {
   const cellsPlayerTwo = event.target.closest(".player2-cell");
   const node = event.target;
 
+  // Player vs player
   if (cellsPlayerOne && isGameReady) {
     currentTurn = Game.play(playerOne, gameData, node, currentTurn);
   }
 
   if (cellsPlayerTwo && isGameReady) {
     currentTurn = Game.play(playerTwo, gameData, node, currentTurn);
+  }
+});
+
+document.addEventListener("click", (event) => {
+  const targetNodes = event.target.closest(".computer-cell");
+  const computerCells = document.querySelectorAll(".computer-cell");
+  computer.setNodeList(computerCells);
+  const node = event.target;
+
+  const shipHitBackgroundColor = "#f7dadb";
+  const missBackgroundColor = "#c5e3fc";
+
+  if (targetNodes && isGameReady && selectedOption === "Computer") {
+    if (currentTurn !== computer) {
+      const nodeMatrix = NodeList.nodeListToMatrix(computer.nodelist);
+      const coordinates = NodeList.getIndexOf(node, nodeMatrix);
+
+      if (!computer.playerBoard.hasCellBeenPlayed(coordinates)) {
+        if (
+          computer.playerBoard.receiveAttack(coordinates["x"], coordinates["y"])
+        ) {
+          node.style.backgroundColor = shipHitBackgroundColor;
+          sound.playBoomSfx();
+        } else {
+          node.style.backgroundColor = missBackgroundColor;
+          sound.playSplashSfx();
+          currentTurn = Turn.checkTurn(currentTurn, playerOne, computer);
+        }
+      } else {
+        dom.showModal("Error", "That cell has already been hit");
+      }
+
+      computer.playerBoard.trackShots(coordinates);
+      dom.displayCurrentTurn(currentTurn.name);
+
+      if (
+        playerOne.playerBoard.areAllShipsSunk() ||
+        computer.playerBoard.areAllShipsSunk()
+      ) {
+        dom.showWinModal(currentTurn.name + " has won");
+        playerOne.playerBoard.disableBoard(
+          NodeList.nodeListToMatrix(playerOne.nodelist)
+        );
+        computer.playerBoard.disableBoard(
+          NodeList.nodeListToMatrix(computer.nodelist)
+        );
+      }
+    }
+  }
+
+  if (currentTurn === computer) {
+    while (
+      currentTurn === computer &&
+      (!playerOne.playerBoard.areAllShipsSunk() ||
+        !computer.playerBoard.areAllShipsSunk())
+    ) {
+      const playerOneNodes = document.querySelectorAll(".player1-cell");
+      playerOne.setNodeList(playerOneNodes);
+      const nodeMatrixPlayerOne = NodeList.nodeListToMatrix(playerOneNodes);
+
+      let x = Math.floor(Math.random() * 10);
+      let y = Math.floor(Math.random() * 10);
+      let coordinates = { x: x, y: y };
+
+      while (playerOne.playerBoard.hasCellBeenPlayed(coordinates)) {
+        x = Math.floor(Math.random() * 10);
+        y = Math.floor(Math.random() * 10);
+        coordinates = { x: x, y: y };
+      }
+
+      if (playerOne.playerBoard.receiveAttack(x, y)) {
+        nodeMatrixPlayerOne[x][y].style.backgroundColor =
+          shipHitBackgroundColor;
+        sound.playBoomSfx();
+      } else {
+        nodeMatrixPlayerOne[x][y].style.backgroundColor = missBackgroundColor;
+        sound.playSplashSfx();
+        currentTurn = Turn.checkTurn(currentTurn, playerOne, computer);
+      }
+
+      playerOne.playerBoard.trackShots(coordinates);
+      dom.displayCurrentTurn(currentTurn.name);
+
+      if (
+        playerOne.playerBoard.areAllShipsSunk() ||
+        computer.playerBoard.areAllShipsSunk()
+      ) {
+        dom.showWinModal(currentTurn.name + " has won");
+        playerOne.playerBoard.disableBoard(
+          NodeList.nodeListToMatrix(playerOne.nodelist)
+        );
+        computer.playerBoard.disableBoard(
+          NodeList.nodeListToMatrix(computer.nodelist)
+        );
+      }
+    }
   }
 });
 
@@ -177,11 +297,24 @@ document.querySelector(".win-dialog").addEventListener("cancel", (event) => {
 document.addEventListener("click", (event) => {
   const playAgainButton = event.target.closest(".play-again");
   if (playAgainButton) {
-    playerOne.playerBoard.resetGameBoard();
-    playerTwo.playerBoard.resetGameBoard();
     dom.loadStartScreen();
     dom.closeModal(document.querySelector(".win-dialog"));
     dom.clearText(document.querySelector(".turns"));
+    playerOne.playerBoard.resetGameBoard();
+    if (selectedOption === "Player") {
+      playerTwo.playerBoard.resetGameBoard();
+    } else {
+      computer.playerBoard.resetGameBoard();
+      const mainMenu = document.querySelector(".main-menu");
+      if (mainMenu.classList.contains("main-section-direction")) {
+        const classes = [
+          "main-section-direction",
+          "main-container-start-screen",
+          "main-section-computer-interface",
+        ];
+        dom.removeClasses(mainMenu, classes);
+      }
+    }
   }
 });
 

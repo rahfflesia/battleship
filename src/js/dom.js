@@ -30,6 +30,10 @@ class Dom {
     }
   }
 
+  getSelectValue() {
+    return document.querySelector(".options").value;
+  }
+
   isInputEmpty(input) {
     return input.value.length < 1;
   }
@@ -46,6 +50,10 @@ class Dom {
   setUsernameTwo() {
     this.usernameTwoInputValue =
       document.querySelector(".player2-username").value;
+  }
+
+  setComputerUsername(computer) {
+    this.usernameTwoInputValue = computer.name;
   }
 
   #loadPlayerInterface() {
@@ -129,20 +137,24 @@ class Dom {
     nextButton.textContent = "Next";
   }
 
-  #createComputerInterface() {}
+  #createComputerInterface() {
+    this.createGameboards(true, true);
+  }
 
   createPlayerTitle(container, username) {
     container.textContent = username + "'s gameboard";
     container.classList.add("info-span");
   }
 
-  createGameboardGrid(containerToAppend, isPlayerOne) {
+  createGameboardGrid(containerToAppend, isPlayerOne, isComputer = false) {
     for (let i = 0; i < maxIndex + 1; i++) {
       const playerGameboardRow = document.createElement("div");
       playerGameboardRow.classList.add("row");
       for (let j = 0; j < maxIndex + 1; j++) {
         const playerGameboardCell = document.createElement("div");
-        if (isPlayerOne) {
+        if (isComputer) {
+          playerGameboardCell.classList.add("computer-cell");
+        } else if (isPlayerOne) {
           playerGameboardCell.classList.add("player1-cell");
         } else {
           playerGameboardCell.classList.add("player2-cell");
@@ -181,12 +193,18 @@ class Dom {
     return innerShipsContainer;
   }
 
-  createGameboards() {
+  createGameboards(
+    isComputerInterface,
+    createPlayButton,
+    computerClass = false
+  ) {
     this.#removeAllChilds(this.#mainMenu);
 
     const body = document.querySelector("body");
 
     const mainSection = document.querySelector(".main-menu");
+    if (isComputerInterface)
+      mainSection.classList.add("main-section-computer-interface");
     mainSection.classList.add("main-section-direction");
 
     const playerOneGameboardContainer = document.createElement("div");
@@ -202,11 +220,17 @@ class Dom {
 
     const playButtonGameboardsSection = document.createElement("button");
 
-    const nodes = [
-      playerOneGameboardContainer,
-      shipsContainer,
-      playerTwoGameboardContainer,
-    ];
+    let nodes;
+
+    if (!isComputerInterface) {
+      nodes = [
+        playerOneGameboardContainer,
+        shipsContainer,
+        playerTwoGameboardContainer,
+      ];
+    } else {
+      nodes = [playerOneGameboardContainer, shipsContainer];
+    }
 
     for (let i = 0; i < nodes.length; i++) {
       mainSection.appendChild(nodes[i]);
@@ -214,12 +238,16 @@ class Dom {
 
     const playerOneGameboardTitle = document.createElement("span");
     this.createPlayerTitle(playerOneGameboardTitle, this.usernameOneInputValue);
-
-    const playerTwoGameboardTitle = document.createElement("span");
-    this.createPlayerTitle(playerTwoGameboardTitle, this.usernameTwoInputValue);
-
     playerOneGameboardContainer.appendChild(playerOneGameboardTitle);
-    playerTwoGameboardContainer.appendChild(playerTwoGameboardTitle);
+
+    if (!isComputerInterface) {
+      const playerTwoGameboardTitle = document.createElement("span");
+      this.createPlayerTitle(
+        playerTwoGameboardTitle,
+        this.usernameTwoInputValue
+      );
+      playerTwoGameboardContainer.appendChild(playerTwoGameboardTitle);
+    }
 
     this.createGameboardGrid(playerOneGameboard, true);
 
@@ -239,13 +267,21 @@ class Dom {
     orientationButton.textContent = "horizontal";
     shipsContainer.appendChild(orientationButton);
 
-    this.createGameboardGrid(playerTwoGameboard, false);
+    if (!isComputerInterface) {
+      if (computerClass) {
+        this.createGameboardGrid(playerTwoGameboard, false, true);
+        playerTwoGameboardContainer.appendChild(playerTwoGameboard);
+      } else {
+        this.createGameboardGrid(playerTwoGameboard, false);
+        playerTwoGameboardContainer.appendChild(playerTwoGameboard);
+      }
+    }
 
-    playerTwoGameboardContainer.appendChild(playerTwoGameboard);
-
-    playButtonGameboardsSection.textContent = "Play";
-    playButtonGameboardsSection.classList.add("play-button-gameboards");
-    body.appendChild(playButtonGameboardsSection);
+    if (createPlayButton) {
+      playButtonGameboardsSection.textContent = "Play";
+      playButtonGameboardsSection.classList.add("play-button-gameboards");
+      body.appendChild(playButtonGameboardsSection);
+    }
   }
 
   createFirstChildLoadScreen() {

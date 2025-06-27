@@ -103,7 +103,7 @@ class Gameboard {
     return true;
   }
 
-  place(x, y, length, orientation) {
+  place(x, y, length, orientation, isComputer = false) {
     if (length > maximumLength) {
       dom.showModal("Error", "Ship exceeds the maximum length");
     } else if (x > maximumIndex || x < 0 || y > maximumIndex || y < 0) {
@@ -112,33 +112,53 @@ class Gameboard {
       const newShip = new Ship(length);
       if (orientation === "horizontal") {
         if (!this.areAllNeededCellsEmpty(x, y, length, orientation)) {
-          dom.showModal(
-            "Error",
-            "All the cells required to place the ship are not empty"
-          );
+          if (!isComputer) {
+            dom.showModal(
+              "Error",
+              "All the cells required to place the ship are not empty"
+            );
+          }
+          return false;
         } else if (!this.isShipInBounds(x, y, length, orientation)) {
-          dom.showModal("Error", "Trying to place ship out of board bounds");
+          if (!isComputer) {
+            dom.showModal("Error", "Trying to place ship out of board bounds");
+          }
+          return false;
         } else if (this.hasShipBeenPlaced(length)) {
-          dom.showModal("Error", "That ship has already been placed");
+          if (!isComputer) {
+            dom.showModal("Error", "That ship has already been placed");
+          }
+          return false;
         } else {
           for (let i = y; i < y + length; i++) {
             this.board[x][i] = newShip;
           }
+          return true;
         }
       } else if (orientation === "vertical") {
         if (!this.areAllNeededCellsEmpty(x, y, length, orientation)) {
-          dom.showModal(
-            "Error",
-            "All cells required to place the ship are not empty"
-          );
+          if (!isComputer) {
+            dom.showModal(
+              "Error",
+              "All cells required to place the ship are not empty"
+            );
+          }
+          return false;
         } else if (!this.isShipInBounds(x, y, length, orientation)) {
-          dom.showModal("Error", "Trying to place ship out of bounds");
+          if (!isComputer) {
+            dom.showModal("Error", "Trying to place ship out of bounds");
+          }
+          return false;
         } else if (this.hasShipBeenPlaced(length)) {
-          dom.showModal("Error", "That ship has already been placed");
+          if (!isComputer) {
+            dom.showModal("Error", "That ship has already been placed");
+          }
+          return false;
         } else {
           for (let i = x; i < x + length; i++) {
             this.board[i][y] = newShip;
           }
+          return true;
         }
       } else {
         throw new Error("Not a valid orientation");

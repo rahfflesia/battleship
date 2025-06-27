@@ -120,7 +120,8 @@ select {
 }
 
 .player1-cell,
-.player2-cell {
+.player2-cell,
+.computer-cell {
   cursor: pointer;
   width: var(--default-size);
   height: var(--default-size);
@@ -217,4 +218,11 @@ select {
 .ship {
   display: flex;
   gap: 0.25rem;
+}
+
+.main-section-computer-interface {
+  flex-direction: row;
+  border: 1px solid lightgray;
+  gap: 2rem;
+  padding: 1rem;
 }
