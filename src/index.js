@@ -4,8 +4,6 @@ import { Player } from "./js/player";
 import { Game } from "./js/game";
 import { Sound } from "./js/sound";
 import { Computer } from "./js/computer";
-import { Turn } from "./js/turn";
-import { NodeList } from "./js/nodelist";
 
 let orientation = "horizontal";
 let isGameReady = false;
@@ -29,8 +27,10 @@ document.addEventListener("click", (event) => {
   }
 });
 
-document.querySelector(".close-modal").addEventListener("click", () => {
-  dom.closeModal(document.querySelector(".dialog"));
+const closeModalButton = document.querySelector(".close-modal");
+closeModalButton.addEventListener("click", () => {
+  const dialog = document.querySelector(".dialog");
+  dom.closeModal(dialog);
 });
 
 // Event delegation
@@ -197,100 +197,22 @@ document.addEventListener("click", (event) => {
 document.addEventListener("click", (event) => {
   const targetNodes = event.target.closest(".computer-cell");
   const computerCells = document.querySelectorAll(".computer-cell");
+  const gameDataPvC = { player1: playerOne, player2: computer };
   computer.setNodeList(computerCells);
   const node = event.target;
 
-  const shipHitBackgroundColor = "#f7dadb";
-  const missBackgroundColor = "#c5e3fc";
-
+  // Player vs computer
   if (targetNodes && isGameReady && selectedOption === "Computer") {
-    if (currentTurn !== computer) {
-      const nodeMatrix = NodeList.nodeListToMatrix(computer.nodelist);
-      const coordinates = NodeList.getIndexOf(node, nodeMatrix);
-
-      if (!computer.playerBoard.hasCellBeenPlayed(coordinates)) {
-        if (
-          computer.playerBoard.receiveAttack(coordinates["x"], coordinates["y"])
-        ) {
-          node.style.backgroundColor = shipHitBackgroundColor;
-          sound.playBoomSfx();
-        } else {
-          node.style.backgroundColor = missBackgroundColor;
-          sound.playSplashSfx();
-          currentTurn = Turn.checkTurn(currentTurn, playerOne, computer);
-        }
-      } else {
-        dom.showModal("Error", "That cell has already been hit");
-      }
-
-      computer.playerBoard.trackShots(coordinates);
-      dom.displayCurrentTurn(currentTurn.name);
-
-      if (
-        playerOne.playerBoard.areAllShipsSunk() ||
-        computer.playerBoard.areAllShipsSunk()
-      ) {
-        dom.showWinModal(currentTurn.name + " has won");
-        playerOne.playerBoard.disableBoard(
-          NodeList.nodeListToMatrix(playerOne.nodelist)
-        );
-        computer.playerBoard.disableBoard(
-          NodeList.nodeListToMatrix(computer.nodelist)
-        );
-      }
-    }
+    currentTurn = Game.play(computer, gameDataPvC, node, currentTurn, true);
   }
-
-  if (currentTurn === computer) {
-    while (
-      currentTurn === computer &&
-      (!playerOne.playerBoard.areAllShipsSunk() ||
-        !computer.playerBoard.areAllShipsSunk())
-    ) {
-      const playerOneNodes = document.querySelectorAll(".player1-cell");
-      playerOne.setNodeList(playerOneNodes);
-      const nodeMatrixPlayerOne = NodeList.nodeListToMatrix(playerOneNodes);
-
-      let x = Math.floor(Math.random() * 10);
-      let y = Math.floor(Math.random() * 10);
-      let coordinates = { x: x, y: y };
-
-      while (playerOne.playerBoard.hasCellBeenPlayed(coordinates)) {
-        x = Math.floor(Math.random() * 10);
-        y = Math.floor(Math.random() * 10);
-        coordinates = { x: x, y: y };
-      }
-
-      if (playerOne.playerBoard.receiveAttack(x, y)) {
-        nodeMatrixPlayerOne[x][y].style.backgroundColor =
-          shipHitBackgroundColor;
-        sound.playBoomSfx();
-      } else {
-        nodeMatrixPlayerOne[x][y].style.backgroundColor = missBackgroundColor;
-        sound.playSplashSfx();
-        currentTurn = Turn.checkTurn(currentTurn, playerOne, computer);
-      }
-
-      playerOne.playerBoard.trackShots(coordinates);
-      dom.displayCurrentTurn(currentTurn.name);
-
-      if (
-        playerOne.playerBoard.areAllShipsSunk() ||
-        computer.playerBoard.areAllShipsSunk()
-      ) {
-        dom.showWinModal(currentTurn.name + " has won");
-        playerOne.playerBoard.disableBoard(
-          NodeList.nodeListToMatrix(playerOne.nodelist)
-        );
-        computer.playerBoard.disableBoard(
-          NodeList.nodeListToMatrix(computer.nodelist)
-        );
-      }
-    }
-  }
+  // Computer waits 2 secs to attack
+  setTimeout(() => {
+    currentTurn = computer.play(currentTurn, gameDataPvC);
+  }, 2000);
 });
 
-document.querySelector(".win-dialog").addEventListener("cancel", (event) => {
+const winDialog = document.querySelector(".win-dialog");
+winDialog.addEventListener("cancel", (event) => {
   event.preventDefault();
 });
 
@@ -298,7 +220,7 @@ document.addEventListener("click", (event) => {
   const playAgainButton = event.target.closest(".play-again");
   if (playAgainButton) {
     dom.loadStartScreen();
-    dom.closeModal(document.querySelector(".win-dialog"));
+    dom.closeModal(winDialog);
     dom.clearText(document.querySelector(".turns"));
     playerOne.playerBoard.resetGameBoard();
     if (selectedOption === "Player") {
@@ -318,6 +240,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
+const playerOneUsernameInput = document.querySelector(".player1-username");
 document.addEventListener("DOMContentLoaded", () => {
-  dom.clearInput(document.querySelector(".player1-username"));
+  dom.clearInput(playerOneUsernameInput);
 });

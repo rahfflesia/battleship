@@ -22,13 +22,13 @@ class Gameboard {
       const target = this.board[x][y];
       if (target instanceof Ship) {
         target.hit();
-        if (target.isSunk() && this.getSunkShips() <= 4) {
+        if (this.getSunkShips() === 5) {
+          dom.closeModal(document.querySelector(".dialog"));
+        } else if (target.isSunk() && this.getSunkShips() <= 4) {
           dom.showModal(
             "Ship sunk",
             "You have sunk a ship of length " + target.length
           );
-        } else if (this.getSunkShips() === 5) {
-          dom.closeModal(document.querySelector(".dialog"));
         }
         return true;
       } else {

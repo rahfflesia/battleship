@@ -8,7 +8,7 @@ const dom = new Dom();
 const sound = new Sound();
 
 class Game {
-  static play(player, gameData, node, currentTurn) {
+  static play(player, gameData, node, currentTurn, isComputer = false) {
     let firstPlayer;
     let secondPlayer;
 
@@ -18,14 +18,22 @@ class Game {
     const nodeListCellsPlayerOne = document.querySelectorAll(".player1-cell");
     const nodeListCellsPlayerTwo = document.querySelectorAll(".player2-cell");
 
-    if (player === gameData["player1"]) {
-      firstPlayer = gameData["player1"];
-      firstPlayer.setNodeList(nodeListCellsPlayerOne);
-      secondPlayer = gameData["player2"];
-      secondPlayer.setNodeList(nodeListCellsPlayerTwo);
+    if (!isComputer) {
+      if (player === gameData["player1"]) {
+        firstPlayer = gameData["player1"];
+        firstPlayer.setNodeList(nodeListCellsPlayerOne);
+        secondPlayer = gameData["player2"];
+        secondPlayer.setNodeList(nodeListCellsPlayerTwo);
+      } else {
+        firstPlayer = gameData["player2"];
+        firstPlayer.setNodeList(nodeListCellsPlayerTwo);
+        secondPlayer = gameData["player1"];
+        secondPlayer.setNodeList(nodeListCellsPlayerOne);
+      }
     } else {
+      const computerNodes = document.querySelectorAll(".computer-cell");
       firstPlayer = gameData["player2"];
-      firstPlayer.setNodeList(nodeListCellsPlayerTwo);
+      firstPlayer.setNodeList(computerNodes);
       secondPlayer = gameData["player1"];
       secondPlayer.setNodeList(nodeListCellsPlayerOne);
     }
