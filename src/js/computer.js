@@ -9,6 +9,7 @@ const sound = new Sound();
 const dom = new Dom();
 
 class Computer extends Player {
+  adjacentCells = [];
   placeShips() {
     const shipLengths = [5, 4, 3, 3, 2];
     let i = 0;
@@ -53,17 +54,50 @@ class Computer extends Player {
         playerOne.setNodeList(playerOneNodes);
         const nodeMatrixPlayerOne = NodeList.nodeListToMatrix(playerOneNodes);
 
-        let x = Math.floor(Math.random() * 10);
-        let y = Math.floor(Math.random() * 10);
+        let x = Math.floor(Math.random() * (maxIndex + 1));
+        let y = Math.floor(Math.random() * (maxIndex + 1));
         let coordinates = { x: x, y: y };
 
-        while (playerOne.playerBoard.hasCellBeenPlayed(coordinates)) {
-          x = Math.floor(Math.random() * 10);
-          y = Math.floor(Math.random() * 10);
-          coordinates = { x: x, y: y };
+        if (this.adjacentCells.length < 1) {
+          while (playerOne.playerBoard.hasCellBeenPlayed(coordinates)) {
+            x = Math.floor(Math.random() * (maxIndex + 1));
+            y = Math.floor(Math.random() * (maxIndex + 1));
+            coordinates = { x: x, y: y };
+          }
+        } else {
+          coordinates = this.adjacentCells.pop();
+          x = coordinates["x"];
+          y = coordinates["y"];
         }
 
         if (playerOne.playerBoard.receiveAttack(x, y)) {
+          if (this.adjacentCells.length < 1) {
+            let adjacentCellOne = {};
+            let adjacentCellTwo = {};
+
+            if (
+              playerOne.playerBoard.board[x][y].orientation === "horizontal"
+            ) {
+              adjacentCellOne = { x: x, y: y + 1 };
+              adjacentCellTwo = { x: x, y: y - 1 };
+            } else {
+              adjacentCellOne = { x: x + 1, y: y };
+              adjacentCellTwo = { x: x - 1, y: y };
+            }
+
+            const adjacentCells = [adjacentCellOne, adjacentCellTwo];
+            for (let i = 0; i < adjacentCells.length; i++) {
+              const currentAdjacentCell = adjacentCells[i];
+              if (
+                !playerOne.playerBoard.hasCellBeenPlayed(currentAdjacentCell) &&
+                !playerOne.playerBoard.areCoordinatesOutOfBounds(
+                  currentAdjacentCell
+                )
+              ) {
+                this.adjacentCells.push(currentAdjacentCell);
+              }
+            }
+          }
           nodeMatrixPlayerOne[x][y].style.backgroundColor =
             shipHitBackgroundColor;
           sound.playBoomSfx();
@@ -74,6 +108,7 @@ class Computer extends Player {
         }
 
         playerOne.playerBoard.trackShots(coordinates);
+        console.log(this.adjacentCells);
         dom.displayCurrentTurn(currentTurn.name);
 
         if (

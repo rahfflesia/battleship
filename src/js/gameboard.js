@@ -109,7 +109,7 @@ class Gameboard {
     } else if (x > maximumIndex || x < 0 || y > maximumIndex || y < 0) {
       dom.showModal("Error", "Trying to place ship out of bounds");
     } else {
-      const newShip = new Ship(length);
+      const newShip = new Ship(length, orientation);
       if (orientation === "horizontal") {
         if (!this.areAllNeededCellsEmpty(x, y, length, orientation)) {
           if (!isComputer) {
@@ -180,6 +180,10 @@ class Gameboard {
       }
     }
     return false;
+  }
+
+  areCoordinatesOutOfBounds(coordinatesObj) {
+    return coordinatesObj["x"] > 9 || coordinatesObj["y"] > 9;
   }
 
   areAllShipsSunk() {
