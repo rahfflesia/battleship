@@ -15,17 +15,17 @@ class Gameboard {
     }
   }
 
-  receiveAttack(x, y) {
+  receiveAttack(x, y, showSign = true) {
     const target = this.board[x][y];
     if (target instanceof Ship) {
       target.hit();
-      if (this.getSunkShips() === 5) {
-        dom.closeModal(document.querySelector(".dialog"));
-      } else if (target.isSunk() && this.getSunkShips() <= 4) {
-        dom.showModal(
-          "Ship sunk",
-          "You have sunk a ship of length " + target.length
-        );
+      if (this.getSunkShips() <= 4) {
+        if (target.isSunk() && showSign) {
+          dom.showModal(
+            "Ship sunk",
+            "You have sunk a ship of length " + target.length
+          );
+        }
       }
       return true;
     } else {
@@ -37,7 +37,6 @@ class Gameboard {
   areAllNeededCellsEmpty(x, y, length, orientation) {
     if (orientation === "horizontal") {
       for (let i = y; i < y + length; i++) {
-        console.log(y + length);
         if (
           this.board[x][i] instanceof Ship ||
           this.board[x][i] !== undefined
@@ -206,7 +205,7 @@ class Gameboard {
       for (let j = 0; j < this.board[i].length; j++) {
         const coordinatesObject = { x: i, y: j };
         if (!this.hasCellBeenPlayed(coordinatesObject)) {
-          this.receiveAttack(i, j);
+          this.receiveAttack(i, j, false);
           this.trackShots(coordinatesObject);
           dom.updateCellInNodelist(nodeListMatrix, this.board);
         }

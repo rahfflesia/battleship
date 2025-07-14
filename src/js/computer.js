@@ -125,9 +125,6 @@ class Computer extends Player {
           await sleep(2000);
         }
 
-        console.log(playerOne.playerBoard.cellsPlayed);
-        console.log(x, y);
-
         if (
           playerOne.playerBoard.areCoordinatesInBounds(x, y) &&
           !playerOne.playerBoard.receiveAttack(x, y) &&
