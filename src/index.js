@@ -4,6 +4,7 @@ import { Player } from "./js/player";
 import { Game } from "./js/game";
 import { Sound } from "./js/sound";
 import { Computer } from "./js/computer";
+import { sleep } from "./js/sleep";
 
 let orientation = "horizontal";
 let isGameReady = false;
@@ -185,16 +186,16 @@ document.addEventListener("click", (event) => {
   const node = event.target;
 
   // Player vs player
-  if (cellsPlayerOne && isGameReady) {
+  if (cellsPlayerOne && isGameReady && selectedOption === "Player") {
     currentTurn = Game.play(playerOne, gameData, node, currentTurn);
   }
 
-  if (cellsPlayerTwo && isGameReady) {
+  if (cellsPlayerTwo && isGameReady && selectedOption === "Player") {
     currentTurn = Game.play(playerTwo, gameData, node, currentTurn);
   }
 });
 
-document.addEventListener("click", (event) => {
+document.addEventListener("click", async (event) => {
   const targetNodes = event.target.closest(".computer-cell");
   const computerCells = document.querySelectorAll(".computer-cell");
   const gameDataPvC = { player1: playerOne, player2: computer };
@@ -204,11 +205,20 @@ document.addEventListener("click", (event) => {
   // Player vs computer
   if (targetNodes && isGameReady && selectedOption === "Computer") {
     currentTurn = Game.play(computer, gameDataPvC, node, currentTurn, true);
+
+    // Computer's turn
+    if (currentTurn === computer) {
+      await sleep(2000);
+      computer
+        .play(currentTurn, gameDataPvC)
+        .then((newTurn) => {
+          currentTurn = newTurn;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }
-  // Computer waits 2 secs to attack
-  setTimeout(() => {
-    currentTurn = computer.play(currentTurn, gameDataPvC);
-  }, 2000);
 });
 
 const winDialog = document.querySelector(".win-dialog");
@@ -223,6 +233,7 @@ document.addEventListener("click", (event) => {
     dom.closeModal(winDialog);
     dom.clearText(document.querySelector(".turns"));
     playerOne.playerBoard.resetGameBoard();
+    currentTurn = playerOne;
     if (selectedOption === "Player") {
       playerTwo.playerBoard.resetGameBoard();
     } else {
@@ -233,6 +244,7 @@ document.addEventListener("click", (event) => {
           "main-section-direction",
           "main-container-start-screen",
           "main-section-computer-interface",
+          "main-section",
         ];
         dom.removeClasses(mainMenu, classes);
       }

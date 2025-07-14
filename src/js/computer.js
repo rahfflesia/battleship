@@ -3,10 +3,12 @@ import { Sound } from "./sound";
 import { NodeList } from "./nodelist";
 import { Turn } from "./turn";
 import { Dom } from "./dom";
+import { sleep } from "./sleep";
 
 const maxIndex = 9;
 const sound = new Sound();
 const dom = new Dom();
+let target;
 
 class Computer extends Player {
   adjacentCells = [];
@@ -37,7 +39,7 @@ class Computer extends Player {
     }
   }
 
-  play(currentTurn, gameData) {
+  async play(currentTurn, gameData) {
     const shipHitBackgroundColor = "#f7dadb";
     const missBackgroundColor = "#c5e3fc";
 
@@ -58,57 +60,84 @@ class Computer extends Player {
         let y = Math.floor(Math.random() * (maxIndex + 1));
         let coordinates = { x: x, y: y };
 
-        if (this.adjacentCells.length < 1) {
+        if (this.adjacentCells.length === 0) {
           while (playerOne.playerBoard.hasCellBeenPlayed(coordinates)) {
             x = Math.floor(Math.random() * (maxIndex + 1));
             y = Math.floor(Math.random() * (maxIndex + 1));
             coordinates = { x: x, y: y };
           }
         } else {
-          coordinates = this.adjacentCells.pop();
-          x = coordinates["x"];
-          y = coordinates["y"];
-        }
-
-        if (playerOne.playerBoard.receiveAttack(x, y)) {
-          if (this.adjacentCells.length < 1) {
-            let adjacentCellOne = {};
-            let adjacentCellTwo = {};
-
+          target = this.adjacentCells.pop();
+          if (
+            playerOne.playerBoard.areCoordinatesInBounds(
+              target["x"],
+              target["y"]
+            )
+          ) {
+            x = target["x"];
+            y = target["y"];
             if (
               playerOne.playerBoard.board[x][y].orientation === "horizontal"
             ) {
-              adjacentCellOne = { x: x, y: y + 1 };
-              adjacentCellTwo = { x: x, y: y - 1 };
+              y--;
             } else {
-              adjacentCellOne = { x: x + 1, y: y };
-              adjacentCellTwo = { x: x - 1, y: y };
-            }
-
-            const adjacentCells = [adjacentCellOne, adjacentCellTwo];
-            for (let i = 0; i < adjacentCells.length; i++) {
-              const currentAdjacentCell = adjacentCells[i];
-              if (
-                !playerOne.playerBoard.hasCellBeenPlayed(currentAdjacentCell) &&
-                !playerOne.playerBoard.areCoordinatesOutOfBounds(
-                  currentAdjacentCell
-                )
-              ) {
-                this.adjacentCells.push(currentAdjacentCell);
-              }
+              x--;
             }
           }
+        }
+
+        while (
+          !playerOne.playerBoard.hasCellBeenPlayed({ x: x, y: y }) &&
+          playerOne.playerBoard.areCoordinatesInBounds(x, y) &&
+          playerOne.playerBoard.receiveAttack(x, y)
+        ) {
+          playerOne.playerBoard.trackShots({ x: x, y: y });
           nodeMatrixPlayerOne[x][y].style.backgroundColor =
             shipHitBackgroundColor;
           sound.playBoomSfx();
-        } else {
+
+          if (this.adjacentCells.length === 0) {
+            this.adjacentCells.push(coordinates);
+          }
+
+          const cell = playerOne.playerBoard.board[x][y];
+          if (cell.isSunk()) {
+            target = undefined;
+            this.adjacentCells = [];
+            break;
+          }
+
+          if (!cell.isSunk()) {
+            if (cell.orientation === "horizontal") {
+              if (target === undefined) {
+                y++;
+              } else {
+                y--;
+              }
+            } else {
+              if (target === undefined) {
+                x++;
+              } else {
+                x--;
+              }
+            }
+          }
+          await sleep(2000);
+        }
+
+        console.log(playerOne.playerBoard.cellsPlayed);
+        console.log(x, y);
+
+        if (
+          playerOne.playerBoard.areCoordinatesInBounds(x, y) &&
+          !playerOne.playerBoard.receiveAttack(x, y) &&
+          !playerOne.playerBoard.hasCellBeenPlayed({ x: x, y: y })
+        ) {
           nodeMatrixPlayerOne[x][y].style.backgroundColor = missBackgroundColor;
           sound.playSplashSfx();
           currentTurn = Turn.checkTurn(currentTurn, playerOne, computer);
+          playerOne.playerBoard.trackShots({ x: x, y: y });
         }
-
-        playerOne.playerBoard.trackShots(coordinates);
-        console.log(this.adjacentCells);
         dom.displayCurrentTurn(currentTurn.name);
 
         if (

@@ -16,31 +16,28 @@ class Gameboard {
   }
 
   receiveAttack(x, y) {
-    if (x > maximumIndex || x < 0 || y > maximumIndex || y < 0) {
-      dom.showModal("Index out of bounds");
-    } else {
-      const target = this.board[x][y];
-      if (target instanceof Ship) {
-        target.hit();
-        if (this.getSunkShips() === 5) {
-          dom.closeModal(document.querySelector(".dialog"));
-        } else if (target.isSunk() && this.getSunkShips() <= 4) {
-          dom.showModal(
-            "Ship sunk",
-            "You have sunk a ship of length " + target.length
-          );
-        }
-        return true;
-      } else {
-        this.board[x][y] = 0;
-        return false;
+    const target = this.board[x][y];
+    if (target instanceof Ship) {
+      target.hit();
+      if (this.getSunkShips() === 5) {
+        dom.closeModal(document.querySelector(".dialog"));
+      } else if (target.isSunk() && this.getSunkShips() <= 4) {
+        dom.showModal(
+          "Ship sunk",
+          "You have sunk a ship of length " + target.length
+        );
       }
+      return true;
+    } else {
+      this.board[x][y] = 0;
+      return false;
     }
   }
 
   areAllNeededCellsEmpty(x, y, length, orientation) {
     if (orientation === "horizontal") {
       for (let i = y; i < y + length; i++) {
+        console.log(y + length);
         if (
           this.board[x][i] instanceof Ship ||
           this.board[x][i] !== undefined
@@ -111,17 +108,17 @@ class Gameboard {
     } else {
       const newShip = new Ship(length, orientation);
       if (orientation === "horizontal") {
-        if (!this.areAllNeededCellsEmpty(x, y, length, orientation)) {
+        if (!this.isShipInBounds(x, y, length, orientation)) {
+          if (!isComputer) {
+            dom.showModal("Error", "Trying to place ship out of board bounds");
+          }
+          return false;
+        } else if (!this.areAllNeededCellsEmpty(x, y, length, orientation)) {
           if (!isComputer) {
             dom.showModal(
               "Error",
-              "All the cells required to place the ship are not empty"
+              "All cells required to place the ship are not empty"
             );
-          }
-          return false;
-        } else if (!this.isShipInBounds(x, y, length, orientation)) {
-          if (!isComputer) {
-            dom.showModal("Error", "Trying to place ship out of board bounds");
           }
           return false;
         } else if (this.hasShipBeenPlaced(length)) {
@@ -136,17 +133,17 @@ class Gameboard {
           return true;
         }
       } else if (orientation === "vertical") {
-        if (!this.areAllNeededCellsEmpty(x, y, length, orientation)) {
+        if (!this.isShipInBounds(x, y, length, orientation)) {
+          if (!isComputer) {
+            dom.showModal("Error", "Trying to place ship out of board bounds");
+          }
+          return false;
+        } else if (!this.areAllNeededCellsEmpty(x, y, length, orientation)) {
           if (!isComputer) {
             dom.showModal(
               "Error",
               "All cells required to place the ship are not empty"
             );
-          }
-          return false;
-        } else if (!this.isShipInBounds(x, y, length, orientation)) {
-          if (!isComputer) {
-            dom.showModal("Error", "Trying to place ship out of bounds");
           }
           return false;
         } else if (this.hasShipBeenPlaced(length)) {
@@ -183,7 +180,12 @@ class Gameboard {
   }
 
   areCoordinatesOutOfBounds(coordinatesObj) {
-    return coordinatesObj["x"] > 9 || coordinatesObj["y"] > 9;
+    return (
+      coordinatesObj["x"] < 0 ||
+      coordinatesObj["x"] > 9 ||
+      coordinatesObj["y"] < 0 ||
+      coordinatesObj["y"] > 9
+    );
   }
 
   areAllShipsSunk() {
@@ -233,6 +235,10 @@ class Gameboard {
   resetGameBoard() {
     this.cellsPlayed = [];
     this.removeShips();
+  }
+
+  areCoordinatesInBounds(x, y) {
+    return x >= 0 && x <= 9 && y >= 0 && y <= 9;
   }
 }
 
