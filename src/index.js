@@ -203,11 +203,17 @@ document.addEventListener("click", async (event) => {
   const node = event.target;
 
   // Player vs computer
-  if (targetNodes && isGameReady && selectedOption === "Computer") {
+  if (
+    targetNodes &&
+    isGameReady &&
+    selectedOption === "Computer" &&
+    currentTurn !== computer
+  ) {
     currentTurn = Game.play(computer, gameDataPvC, node, currentTurn, true);
 
     // Computer's turn
     if (currentTurn === computer) {
+      // Wait 2 secs before attacking
       await sleep(2000);
       computer
         .play(currentTurn, gameDataPvC)
